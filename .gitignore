@@ -5,6 +5,11 @@ Thumbs.db
 # Editors
 .vscode/
 .idea/
+.vs/
+*.user
+*.suo
+.DS_Store
+Thumbs.db
 
 # Python
 __pycache__/
@@ -13,6 +18,19 @@ __pycache__/
 
 # Node
 node_modules/
+dist/
 
 # Logs
 *.log
+
+
+# Build/Temp
+bin/
+obj/
+out/
+
+# Secrets/Certs
+*.pfx
+*.snk
+*.key
+*.cer
