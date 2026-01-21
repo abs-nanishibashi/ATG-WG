@@ -1,7 +1,19 @@
+
+using System.Data;
+using Microsoft.Data.SqlClient;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
+
+// ★ DB接続を DI に登録（appsettings.json優先、なければ App Service の環境変数を使用）
+builder.Services.AddScoped<IDbConnection>(_ =>
+{
+    var cs = builder.Configuration.GetConnectionString("GeneralAffairsDb")
+             ?? Environment.GetEnvironmentVariable("SQLCONNSTR_GeneralAffairsDb");
+    return new SqlConnection(cs);
+});
 
 var app = builder.Build();
 

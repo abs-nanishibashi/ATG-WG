@@ -5,3 +5,37 @@
 }
 <h1>発注確認画面</h1>
 <p>サンプル</p>
+<section style="margin: 16px 0;">
+    <button id="btnTables">テーブル一覧</button>
+    <button id="btnColumns">カラム一覧</button>
+    <button id="btnConstraints">制約一覧（PK/UNIQUE/FK）</button>
+</section>
+
+<h3>結果</h3>
+<pre id="out" style="background:#f6f8fa; padding:12px; border-radius:6px; max-height:50vh; overflow:auto;">
+(ここに結果が表示されます)
+</pre>
+
+@section Scripts {
+        <script>
+            const out = document.getElementById('out');
+
+            async function hit(handler) {
+                const url = `?handler=${handler}`;
+                const res = await fetch(url, { method: 'GET' });
+                if (!res.ok) {
+                    const msg = `${res.status} ${res.statusText}`;
+                    console.error(url, msg);
+                    out.textContent = msg;
+                    return;
+                }
+                const data = await res.json();
+                console.log(url, data);      // ← ブラウザの console に出力
+                out.textContent = JSON.stringify(data, null, 2);
+            }
+
+            document.getElementById('btnTables').addEventListener('click', () => hit('Tables'));
+            document.getElementById('btnColumns').addEventListener('click', () => hit('Columns'));
+            document.getElementById('btnConstraints').addEventListener('click', () => hit('Constraints'));
+        </script>
+}
