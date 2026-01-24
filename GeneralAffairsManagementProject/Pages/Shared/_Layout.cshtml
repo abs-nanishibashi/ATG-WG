@@ -1,52 +1,163 @@
-﻿<!DOCTYPE html>
-<html lang="en">
+﻿
+@{
+    var currentPage = (ViewContext.RouteData.Values["page"] as string ?? "").ToLowerInvariant();
+    bool IsActive(string page) => currentPage == page.ToLowerInvariant();
+}
+<!DOCTYPE html>
+<html lang="ja">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - GeneralAffairsManagementProject</title>
+
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/GeneralAffairsManagementProject.styles.css" asp-append-version="true" />
+
+    <style>
+    /* ====== 左サイドナビのスタイル ====== */
+    .layout-wrapper {
+            min-height: 100vh;
+        }
+        .sidebar {
+            width: 260px;
+            max-width: 80vw;
+            border-right: 1px solid rgba(0, 0, 0, .08);
+            background-color: #ffffff;
+        }
+        .sidebar-inner {
+            height: 100vh;
+            position: sticky;
+            top: 0;
+            padding-top: .75rem;
+            padding-bottom: .75rem;
+            overflow-y: auto;
+        }
+        .sidebar .nav-link {
+            color: #344054;
+            border-radius: .5rem;
+            padding: .625rem .75rem;
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+            font-weight: 500;
+        }
+        .sidebar .nav-link:hover {
+            background-color: #f2f4f7;
+            color: #1d2939;
+        }
+        .sidebar .nav-link.active {
+            color: #0d6efd;
+            background-color: #e7f1ff;
+            font-weight: 700;
+        }
+        .sidebar .nav-section-title {
+            font-size: .75rem;
+            letter-spacing: .04em;
+            color: #667085;
+            margin: .75rem .25rem .5rem;
+            text-transform: uppercase;
+        }
+        /* 小画面ではサイドバーを非表示（トグルで展開） */
+        @* RazorにC#コードでないことを伝える *@
+/*media (max-width: 991.98px) {
+    .sidebar {
+        position: fixed;
+        z-index: 1040;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        transform: translateX(-100%);
+        transition: transform .2s ease-in-out;
+    }*/
+    .sidebar.show {
+        transform: translateX(0);
+        box-shadow: 0 0 0 9999px rgba(0,0,0,.35);
+    }
+    .main-header .menu-toggle {
+        display: inline-flex !important;
+    }
+}
+        /* ====== メイン領域 ====== */
+        .main {
+            flex: 1 1 auto;
+            min-width: 0;
+            background-color: #f8fafc;
+        }
+        .main-header {
+            position: sticky;
+            top: 0;
+            z-index: 1030;
+            background: #ffffff;
+            border-bottom: 1px solid rgba(0, 0, 0, .08);
+        }
+        .main-body {
+            padding: 1.25rem;
+        }
+        /* ====== ちょい足しのユーティリティ ====== */
+        .brand {
+            font-weight: 700;
+            letter-spacing: .01em;
+            color: #0d6efd;
+            text-decoration: none;
+        }
+        .brand:hover { color: #0a58ca; }
+        .icon {
+            width: 1.1rem; height: 1.1rem; display: inline-block;
+        }
+    </style>
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container">
-                                <p>サンプル的な画面遷移リンク（理想は左ナビ）</p>
-                                                <div class="btn-group" role="group" aria-label="Main menu">
-                <a class="btn btn-outline-primary" asp-page="/Index">新規発注画面へ</a>
-                @*                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/Privacy">Privacy</a>
-                        </li>
-                    </ul>
-                </div> *@
+    <div class="d-flex layout-wrapper">
+        <!-- ===== 左サイドバー ===== -->
+        <aside id="appSidebar" class="sidebar bg-white">
+            <div class="sidebar-inner d-flex flex-column">
+                <div class="px-3 d-flex align-items-center justify-content-between">
+                    <a class="brand" asp-page="/Index">庶務管理システム</a>
+                    <button type="button" class="btn btn-sm btn-outline-secondary d-lg-none"
+                            aria-label="Close menu" onclick="toggleSidebar(false)">
+                        ✕
+                    </button>
+                </div>
 
-                    <a class="btn btn-outline-primary" asp-page="/NewOrder">新規発注画面へ</a>
-                    <a class="btn btn-outline-primary" asp-page="/OrderConfirmation">発注確認画面へ</a>
+                <div class="px-3 mt-3">
+                    <nav class="nav flex-column gap-1">
+                        <a class="nav-link @(IsActive("/Index") ? "active" : "")" asp-page="/Index">
+                          発注検索
+                        </a>
+                        <a class="nav-link @(IsActive("/NewOrder") ? "active" : "")" asp-page="/NewOrder">
+                            新規発注
+                        </a>
+                        <a class="nav-link @(IsActive("/OrderConfirmation") ? "active" : "")" asp-page="/OrderConfirmation">
+                         発注確認
+                        </a>
+                    </nav>
+
                 </div>
             </div>
-        </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
+        </aside>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2026 - GeneralAffairsManagementProject - <a asp-area="" asp-page="/Privacy">Privacy</a>
+        <!-- ===== 右メイン領域 ===== -->
+        <div class="main d-flex flex-column">
+            <header class="main-header">
+                <div class="container-fluid py-2 d-flex align-items-center gap-2">
+                    <div class="ms-auto d-flex align-items-center gap-2">
+                        @* 右上に将来：ユーザー、通知、ヘルプ等を置く余白 *@
+                    </div>
+                </div>
+            </header>
+
+            <main role="main" class="main-body">
+                @RenderBody()
+            </main>
+
+            <footer class="mt-auto">
+                <div class="container-fluid border-top py-3 text-muted small">
+                    &copy; 2026 - GeneralAffairsManagementProject - <a asp-page="/Privacy">Privacy</a>
+                </div>
+            </footer>
         </div>
-    </footer>
+    </div>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
@@ -55,3 +166,4 @@
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
+``
