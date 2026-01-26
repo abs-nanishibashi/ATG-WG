@@ -1,10 +1,249 @@
 ﻿@page
-@model IndexModel
+@model GeneralAffairsManagementProject.Pages.IndexModel
 @{
     ViewData["Title"] = "発注検索画面";
 }
+
 <h1>発注検索画面</h1>
-<p>初期表示画面</p>
+
+<form method="post">
+    <!-- 検索条件 -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">検索条件</h5>
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                <!-- 発注方法 -->
+                <div class="col-md-6">
+                    <label asp-for="SearchCondition.OrderingMethodId" class="form-label">発注方法</label>
+                    <select asp-for="SearchCondition.OrderingMethodId" class="form-select">
+                        <option value="">-- 選択してください --</option>
+                        @foreach (var method in Model.OrderingMethods)
+                        {
+                            <option value="@method.Id">@method.Name</option>
+                        }
+                    </select>
+                </div>
+
+                <!-- 発注者 -->
+                <div class="col-md-6">
+                    <label asp-for="SearchCondition.OrderUser" class="form-label">発注者</label>
+                    <input asp-for="SearchCondition.OrderUser" class="form-control" placeholder="前方一致検索" maxlength="20" />
+                    <small class="text-muted">※半角文字で入力してください</small>
+                </div>
+
+                <!-- 有効期限切れ且つ未納品を含む -->
+                <div class="col-md-12">
+                    <div class="form-check">
+                        <input asp-for="SearchCondition.IncludeExpiredNotDelivered" class="form-check-input" type="checkbox" />
+                        <label asp-for="SearchCondition.IncludeExpiredNotDelivered" class="form-check-label">
+                            有効期限切れ且つ未納品を含む
+                        </label>
+                    </div>
+                </div>
+
+                <!-- 品目番号 -->
+                <div class="col-md-6">
+                    <label asp-for="SearchCondition.ItemNumber" class="form-label">品目番号</label>
+                    <input asp-for="SearchCondition.ItemNumber" class="form-control" placeholder="前方一致検索" maxlength="15" />
+                    <small class="text-muted">※半角文字で入力してください</small>
+                </div>
+
+                <!-- ステータス -->
+                <div class="col-md-6">
+                    <label asp-for="SearchCondition.StatusId" class="form-label">ステータス</label>
+                    <select asp-for="SearchCondition.StatusId" class="form-select">
+                        <option value="">-- 選択してください --</option>
+                        @foreach (var status in Model.OrderStatuses)
+                        {
+                            <option value="@status.Id">@status.OrderStatusName</option>
+                        }
+                    </select>
+                </div>
+
+                <!-- 発注日From -->
+                <div class="col-md-6">
+                    <label asp-for="SearchCondition.OrderDateFrom" class="form-label">発注日（From）</label>
+                    <input asp-for="SearchCondition.OrderDateFrom" class="form-control" type="date" />
+                    @if (Model.ValidationErrors.ContainsKey("OrderDate"))
+                    {
+                        <div class="text-danger small mt-1">
+                            <i class="bi bi-exclamation-circle"></i> @Model.ValidationErrors["OrderDate"]
+                        </div>
+                    }
+                </div>
+
+                <!-- 発注日To -->
+                <div class="col-md-6">
+                    <label asp-for="SearchCondition.OrderDateTo" class="form-label">発注日（To）</label>
+                    <input asp-for="SearchCondition.OrderDateTo" class="form-control" type="date" />
+                </div>
+
+                <!-- 納品日From -->
+                <div class="col-md-6">
+                    <label asp-for="SearchCondition.DeliveryDateFrom" class="form-label">納品日（From）</label>
+                    <input asp-for="SearchCondition.DeliveryDateFrom" class="form-control" type="date" />
+                    @if (Model.ValidationErrors.ContainsKey("DeliveryDate"))
+                    {
+                        <div class="text-danger small mt-1">
+                            <i class="bi bi-exclamation-circle"></i> @Model.ValidationErrors["DeliveryDate"]
+                        </div>
+                    }
+                </div>
+
+                <!-- 納品日To -->
+                <div class="col-md-6">
+                    <label asp-for="SearchCondition.DeliveryDateTo" class="form-label">納品日（To）</label>
+                    <input asp-for="SearchCondition.DeliveryDateTo" class="form-control" type="date" />
+                </div>
+
+                <!-- ボタン -->
+                <div class="col-12">
+                    <button type="submit" asp-page-handler="Search" class="btn btn-primary">
+                        <i class="bi bi-search"></i> 検索
+                    </button>
+                    <button type="submit" asp-page-handler="Clear" class="btn btn-secondary ms-2">
+                        <i class="bi bi-x-circle"></i> クリア
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 検索結果 -->
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">発注一覧</h5>
+            <span class="badge bg-secondary">全 @Model.PagingInfo.TotalCount 件</span>
+        </div>
+        <div class="card-body">
+            @if (Model.SearchResults.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover table-bordered align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 120px;">発注ID</th>
+                                <th style="width: 120px;">発注日</th>
+                                <th style="width: 150px;">発注者</th>
+                                <th style="width: 120px;">発注方法</th>
+                                <th>発注品番</th>
+                                <th class="text-end" style="width: 120px;">合計金額</th>
+                                <th style="width: 120px;">発注ステータス</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.SearchResults)
+                            {
+                                <tr>
+                                    <td>
+                                        <a asp-page="/OrderDetail" asp-route-id="@item.OrderId" class="text-decoration-none">
+                                            @item.OrderIdDisplay
+                                        </a>
+                                    </td>
+                                    <td>@item.OrderDate.ToString("yyyy/MM/dd")</td>
+                                    <td>@item.OrderUser</td>
+                                    <td>@item.OrderingMethodName</td>
+                                    <td>
+                                        <span style="word-break: break-all;">@item.ItemNumbers</span>
+                                    </td>
+                                    <td class="text-end">¥@item.TotalPrice.ToString("#,##0")</td>
+                                    <td>@item.OrderStatusName</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- ページング -->
+                @if (Model.PagingInfo.TotalPages > 1)
+                {
+                    <nav aria-label="検索結果ページング" class="mt-3">
+                        <ul class="pagination justify-content-center mb-0">
+                            <!-- 前へ -->
+                            <li class="page-item @(!Model.PagingInfo.HasPreviousPage ? "disabled" : "")">
+                                @if (Model.PagingInfo.HasPreviousPage)
+                                {
+                                    <button type="submit" asp-page-handler="Page" asp-route-page="@(Model.PagingInfo.CurrentPage - 1)"
+                                            class="page-link">
+                                        <i class="bi bi-chevron-left"></i> 前へ
+                                    </button>
+                                }
+                                else
+                                {
+                                    <span class="page-link">
+                                        <i class="bi bi-chevron-left"></i> 前へ
+                                    </span>
+                                }
+                            </li>
+
+                            <!-- ページ番号 -->
+                            @foreach (var pageNumber in Model.PagingInfo.PageNumbers)
+                            {
+                                <li class="page-item @(pageNumber == Model.PagingInfo.CurrentPage ? "active" : "")">
+                                    @if (pageNumber == Model.PagingInfo.CurrentPage)
+                                    {
+                                        <span class="page-link">@pageNumber</span>
+                                    }
+                                    else
+                                    {
+                                        <button type="submit" asp-page-handler="Page" asp-route-page="@pageNumber" class="page-link">
+                                            @pageNumber
+                                        </button>
+                                    }
+                                </li>
+                            }
+
+                            <!-- 次へ -->
+                            <li class="page-item @(!Model.PagingInfo.HasNextPage ? "disabled" : "")">
+                                @if (Model.PagingInfo.HasNextPage)
+                                {
+                                    <button type="submit" asp-page-handler="Page" asp-route-page="@(Model.PagingInfo.CurrentPage + 1)"
+                                            class="page-link">
+                                        次へ <i class="bi bi-chevron-right"></i>
+                                    </button>
+                                }
+                                else
+                                {
+                                    <span class="page-link">
+                                        次へ <i class="bi bi-chevron-right"></i>
+                                    </span>
+                                }
+                            </li>
+                        </ul>
+                    </nav>
+
+                    <div class="text-center mt-2">
+                        <small class="text-muted">
+                            @Model.PagingInfo.CurrentPage / @Model.PagingInfo.TotalPages ページ
+                            （@((Model.PagingInfo.CurrentPage - 1) * Model.PagingInfo.PageSize + 1)〜@Math.Min(Model.PagingInfo.CurrentPage * Model.PagingInfo.PageSize, Model.PagingInfo.TotalCount) 件目を表示）
+                        </small>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="alert alert-info mb-0" role="alert">
+                    <i class="bi bi-info-circle"></i> 検索条件に一致するデータがありません。
+                </div>
+            }
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <script>
+        // 日付入力の最大値を今日に設定
+        document.addEventListener('DOMContentLoaded', function() {
+            const today = new Date().toISOString().split('T')[0];
+            const dateInputs = document.querySelectorAll('input[type="date"]');
+            dateInputs.forEach(input => {
+                input.setAttribute('max', today);
+            });
+        });
+    </script>
+}       
 
 
 
