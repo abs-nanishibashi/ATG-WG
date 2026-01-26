@@ -1,4 +1,4 @@
-﻿
+﻿@using Microsoft.AspNetCore.Mvc.Razor
 @{
     var currentPage = (ViewContext.RouteData.Values["page"] as string ?? "").ToLowerInvariant();
     bool IsActive(string page) => currentPage == page.ToLowerInvariant();
@@ -12,18 +12,28 @@
 
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/layout.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/GeneralAffairsManagementProject.styles.css" asp-append-version="true" />
 
     <style>
-    /* ====== 左サイドナビのスタイル ====== */
-    .layout-wrapper {
+        /* ====== 左サイドナビのスタイル ====== */
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+        }
+        .layout-wrapper {
+            display: flex;
             min-height: 100vh;
+            width: 100%;
         }
         .sidebar {
             width: 260px;
-            max-width: 80vw;
+            max-width: 260px;
+            min-width: 260px;
             border-right: 1px solid rgba(0, 0, 0, .08);
             background-color: #ffffff;
+            flex-shrink: 0;
         }
         .sidebar-inner {
             height: 100vh;
@@ -58,30 +68,14 @@
             margin: .75rem .25rem .5rem;
             text-transform: uppercase;
         }
-        /* 小画面ではサイドバーを非表示（トグルで展開） */
-        @* RazorにC#コードでないことを伝える *@
-/*media (max-width: 991.98px) {
-    .sidebar {
-        position: fixed;
-        z-index: 1040;
-        left: 0;
-        top: 0;
-        bottom: 0;
-        transform: translateX(-100%);
-        transition: transform .2s ease-in-out;
-    }*/
-    .sidebar.show {
-        transform: translateX(0);
-        box-shadow: 0 0 0 9999px rgba(0,0,0,.35);
-    }
-    .main-header .menu-toggle {
-        display: inline-flex !important;
-    }
-}
+
         /* ====== メイン領域 ====== */
         .main {
-            flex: 1 1 auto;
+            flex: 1;
             min-width: 0;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
             background-color: #f8fafc;
         }
         .main-header {
@@ -93,6 +87,7 @@
         }
         .main-body {
             padding: 1.25rem;
+            flex: 1;
         }
         /* ====== ちょい足しのユーティリティ ====== */
         .brand {
@@ -105,19 +100,16 @@
         .icon {
             width: 1.1rem; height: 1.1rem; display: inline-block;
         }
+
     </style>
 </head>
 <body>
-    <div class="d-flex layout-wrapper">
+    <div class="layout-wrapper">
         <!-- ===== 左サイドバー ===== -->
         <aside id="appSidebar" class="sidebar bg-white">
             <div class="sidebar-inner d-flex flex-column">
                 <div class="px-3 d-flex align-items-center justify-content-between">
                     <a class="brand" asp-page="/Index">庶務管理システム</a>
-                    <button type="button" class="btn btn-sm btn-outline-secondary d-lg-none"
-                            aria-label="Close menu" onclick="toggleSidebar(false)">
-                        ✕
-                    </button>
                 </div>
 
                 <div class="px-3 mt-3">
@@ -138,7 +130,7 @@
         </aside>
 
         <!-- ===== 右メイン領域 ===== -->
-        <div class="main d-flex flex-column">
+        <div class="main">
             <header class="main-header">
                 <div class="container-fluid py-2 d-flex align-items-center gap-2">
                     <div class="ms-auto d-flex align-items-center gap-2">
@@ -150,12 +142,6 @@
             <main role="main" class="main-body">
                 @RenderBody()
             </main>
-
-            <footer class="mt-auto">
-                <div class="container-fluid border-top py-3 text-muted small">
-                    &copy; 2026 - GeneralAffairsManagementProject - <a asp-page="/Privacy">Privacy</a>
-                </div>
-            </footer>
         </div>
     </div>
 
@@ -166,4 +152,3 @@
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
-``

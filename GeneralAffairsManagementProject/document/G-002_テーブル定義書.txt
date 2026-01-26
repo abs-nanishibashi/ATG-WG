@@ -1,0 +1,136 @@
+データベース名		GeneralAffairsDb			スキーマ		dbo			1レコードのサイズ					バイト							
+テーブル名		発注方法マスタ								初期データ数						初期データサイズ	0	Ｍバイト				
+テーブルID		TM_ORDERING_METHOD								3年後のデータ数						3年後データサイズ	0	Mバイト				
+																						
+№	フィールド名称	項目名称	属性	桁数	小数	"サイズ
+(Byte)"	PK	1	2	3	4	5	必須	"初期値
+(Default)"	制約	項目説明	区分種別	FK				備考
+								INDEX										参照先テーブル	参照先カラム名	"ON UPDATE
+(親の変更時)"	"ON DELETE
+(親の削除時)"	
+1	発注方法ID	ID	INT	4		4	1						○			1:アスクル、2:常備薬、3:バリスタ						Identity(1, 1)
+2	発注方法名	NAME	NVARCHAR	20		42							○									
+3	内税外税区分	TAX_TYPE	INT	4		4							○			"発注時の金額が内税か外税であるかを示す
+1:内税(税込)、2:外税(税抜)"						
+4	削除フラグ	DELETE_FLAG	BIT	1		1							○	0								
+5	作成日時	CREATE_DATETIME	DATETIME	8		8								Getdate()								
+6	作成者ID	CREATE_USER_ID	NVARCHAR	10		22																
+7	更新日時	UPDATE_DATETIME	DATETIME	8		8								Getdate()								
+8	更新者ID	UPDATE_USER_ID	NVARCHAR	10		22																
+
+
+データベース名		GeneralAffairsDb			スキーマ		dbo			1レコードのサイズ					バイト							
+テーブル名		消耗品カテゴリマスタ								初期データ数						初期データサイズ	0	Ｍバイト				
+テーブルID		TM_CONSUMABLES_CATEGORY								3年後のデータ数						3年後データサイズ	0	Mバイト				
+																						
+№	フィールド名称	項目名称	属性	桁数	小数	"サイズ
+(Byte)"	PK	1	2	3	4	5	必須	"初期値
+(Default)"	制約	項目説明	区分種別	FK				備考
+								INDEX										参照先テーブル	参照先カラム名	"ON UPDATE
+(親の変更時)"	"ON DELETE
+(親の削除時)"	
+1	カテゴリID	ID	INT	4		4	1						○									Identity(1, 1)
+2	発注方法ID	METHOD_ID	INT	4		4		1					○									
+3	カテゴリ名	CATEGORY_NAME	NVARCHAR	20		42							○									
+4	削除フラグ	DELETE_FLAG	BIT	1		1							○	0								
+5	作成日時	CREATE_DATETIME	DATETIME	8		8								Getdate()								
+6	作成者ID	CREATE_USER_ID	NVARCHAR	10		22																
+7	更新日時	UPDATE_DATETIME	DATETIME	8		8								Getdate()								
+8	更新者ID	UPDATE_USER_ID	NVARCHAR	10		22																
+
+
+データベース名		GeneralAffairsDb			スキーマ		dbo			1レコードのサイズ					バイト							
+テーブル名		消耗品マスタ								初期データ数						初期データサイズ	0	Ｍバイト				
+テーブルID		TM_CONSUMABLES								3年後のデータ数						3年後データサイズ	0	Mバイト				
+																						
+№	フィールド名称	項目名称	属性	桁数	小数	"サイズ
+(Byte)"	PK	1	2	3	4	5	必須	"初期値
+(Default)"	制約	項目説明	区分種別	FK				備考
+								INDEX										参照先テーブル	参照先カラム名	"ON UPDATE
+(親の変更時)"	"ON DELETE
+(親の削除時)"	
+1	消耗品ID	ID	INT	4		4	1						○									Identity(1, 1)
+2	カテゴリID	CATEGORY_ID	INT	4		4		1					○									
+3	品目番号	ITEM_NO	NVARCHAR	15		32							○									
+4	品目名	ITEM_NAME	NVARCHAR	100		202							○									
+5	メーカー名	MAKER_NAME	NVARCHAR	50		102																
+6	単価額	UNIT_PRICE	INT	4		4							○									
+7	容量備考	CAPACITY_NOTE	NVARCHAR	200		402										利用せず						
+8	品目備考	ITEM_NOTE	NVARCHAR	400		802																
+9	有効期限日	EXPIRATION_DATE	DATETIME	8		8																
+10	無効フラグ	INVALID_FLAG	BIT	1		1							○	0								
+11	削除フラグ	DELETE_FLAG	BIT	1		1							○	0								
+12	作成日時	CREATE_DATETIME	DATETIME	8		8								Getdate()								
+13	作成者ID	CREATE_USER_ID	NVARCHAR	10		22																
+14	更新日時	UPDATE_DATETIME	DATETIME	8		8								Getdate()								
+15	更新者ID	UPDATE_USER_ID	NVARCHAR	10		22																
+
+
+データベース名		GeneralAffairsDb			スキーマ		dbo			1レコードのサイズ					バイト							
+テーブル名		発注ステータスマスタ								初期データ数						初期データサイズ	0	Ｍバイト				
+テーブルID		TM_ORDER_STATUS								3年後のデータ数						3年後データサイズ	0	Mバイト				
+																						
+№	フィールド名称	項目名称	属性	桁数	小数	"サイズ
+(Byte)"	PK	1	2	3	4	5	必須	"初期値
+(Default)"	制約	項目説明	区分種別	FK				備考
+								INDEX										参照先テーブル	参照先カラム名	"ON UPDATE
+(親の変更時)"	"ON DELETE
+(親の削除時)"	
+1	発注ステータスID	ID	INT	4		4	1						○									Identity(1, 1)
+2	発注ステータス名	ORDER_STATUS_NAME	NVARCHAR	20		42							○									
+3	削除フラグ	DELETE_FLAG	BIT	1		1							○	0								
+4	作成日時	CREATE_DATETIME	DATETIME	8		8								Getdate()								
+5	作成者ID	CREATE_USER_ID	NVARCHAR	10		22																
+6	更新日時	UPDATE_DATETIME	DATETIME	8		8								Getdate()								
+7	更新者ID	UPDATE_USER_ID	NVARCHAR	10		22										
+
+データベース名		GeneralAffairsDb			スキーマ		dbo			1レコードのサイズ					バイト							
+テーブル名		発注明細								初期データ数						初期データサイズ	0	Ｍバイト				
+テーブルID		TD_ORDER_DETAILS								3年後のデータ数						3年後データサイズ	0	Mバイト				
+																						
+№	フィールド名称	項目名称	属性	桁数	小数	"サイズ
+(Byte)"	PK	1	2	3	4	5	必須	"初期値
+(Default)"	制約	項目説明	区分種別	FK				備考
+								INDEX										参照先テーブル	参照先カラム名	"ON UPDATE
+(親の変更時)"	"ON DELETE
+(親の削除時)"	
+1	発注明細ID	ID	INT	4		4	1						○									Identity(1, 1)
+2	発注ID	ORDER_ID	INT	4		4		1					○		UNIQUE							発注ID＋明細連番で一意
+3	明細連番	SEQ_NO	INT	4		4		2					○		UNIQUE	同一発注ID内での明細連番						発注ID＋明細連番で一意
+4	消耗品ID	CONSUMABLES_ID	INT	4		4			1				○									
+5	発注数	ORDER_QUANTITY	INT	4		4							○									
+6	発注単位名	ORDER_UNIT_NAME	NVARCHAR	20		42																
+7	発注時単価額	ORDERING_TIME_UNIT_PRICE	INT	4		4							○									
+8	納品予定日	SCHEDULED_DELIVERY_DATE	DATETIME	8		8																
+9	納品済フラグ	DELIVERYED_FLAG	BIT	1		1							○									
+10	発注明細備考	ORDER_DETAILS_NOTE	NVARCHAR	100		202																
+11	削除フラグ	DELETE_FLAG	BIT	1		1							○	0								
+12	作成日時	CREATE_DATETIME	DATETIME	8		8								Getdate()								
+13	作成者ID	CREATE_USER_ID	NVARCHAR	10		22																
+14	更新日時	UPDATE_DATETIME	DATETIME	8		8								Getdate()								
+15	更新者ID	UPDATE_USER_ID	NVARCHAR	10		22																
+		
+
+データベース名		GeneralAffairsDb			スキーマ		dbo			1レコードのサイズ					バイト							
+テーブル名		発注								初期データ数						初期データサイズ	0	Ｍバイト				
+テーブルID		TD_ORDER								3年後のデータ数						3年後データサイズ	0	Mバイト				
+																						
+№	フィールド名称	項目名称	属性	桁数	小数	"サイズ
+(Byte)"	PK	1	2	3	4	5	必須	"初期値
+(Default)"	制約	項目説明	区分種別	FK				備考
+								INDEX										参照先テーブル	参照先カラム名	"ON UPDATE
+(親の変更時)"	"ON DELETE
+(親の削除時)"	
+1	発注ID	ID	INT	4		4	1						○									Identity(1, 1)
+2	発注番号	ORDER_NO	NVARCHAR	10		22		1							UNIQUE							※IDに年月日等を含める事を検討
+3	発注日	ORDER_DATE	DATETIME	8		8							○									
+4	発注者名	ORDER_USER_NAME	NVARCHAR	20		42																
+5	発注先名	CONTACT_ORDER_NAME	NVARCHAR	20		42																
+6	発注備考	ORDER_NOTE	NVARCHAR	100		202																
+7	発注ステータスID	ORDER_STATUS_ID	INT	4		4			1				○									
+8	削除フラグ	DELETE_FLAG	BIT	1		1							○	0								
+9	作成日時	CREATE_DATETIME	DATETIME	8		8								Getdate()								
+10	作成者ID	CREATE_USER_ID	NVARCHAR	10		22																
+11	更新日時	UPDATE_DATETIME	DATETIME	8		8								Getdate()								
+12	更新者ID	UPDATE_USER_ID	NVARCHAR	10		22																
+				

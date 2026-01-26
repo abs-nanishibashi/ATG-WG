@@ -1,0 +1,33 @@
+	機能別画面概要設計書
+	
+	　	　	　	　	　	　	　	　	　	　	　	　	　	　	　	　	　	　
+	No	画面項目名	画面項目ID	I/O	桁数	ＴＡＢ順	文字揃	形式	部品種類	必須	範囲	半角	全角	日付	金額	初期値	禁止文字	備考
+	1	画面タイトル	lblTitle	O	　	　	　	　	label	　	　	　	　	　	　	　	　	　
+	2	検索条件	　	　	　	　	　	　	　	　	　	　	　	　	　	　	　	　
+	3	発注方法	cmbType	I	　	1	　	　	cmbo box	　	　	　	　	　	　	　	　	　
+	4	発注者	txtUser	I	　	2	　	　	text	　	　	*	　	　	　	　	　	前方一致検索とする
+	5	有効期限切れ且つ未納品を含む	chkIncludeNotDeli	I	　	3	　	　	check box	　	　	　	　	　	　	　	　	　
+	6	品目番号	txtNumber	I	　	4	　	　	text	　	　	*	　	　	　	　	　	前方一致検索とする
+	7	ステータス	cmbStatus	I	　	5	　	　	cmbo box	　	　	　	　	　	　	　	　	　
+	8	発注日（From)	ｔｘｔOrderDateFrom	I	　	6	　	yyyy/mm/dd	text	　	　	　	　	*	　	　	　	　
+	9	発注日（To)	ｔｘｔOrderDateTo	I	　	7	　	yyyy/mm/dd	text	　	　	　	　	*	　	　	　	　
+	10	納品日（From)	ｔｘｔDeliDateFrom	I	　	8	　	yyyy/mm/dd	text	　	　	　	　	*	　	　	　	　
+	11	納品日（To)	ｔｘｔDeliDateTo	I	　	9	　	yyyy/mm/dd	text	　	　	　	　	*	　	　	　	　
+	12	検索ボタン	btnSearch	I	　	　	　	　	button	　	　	　	　	　	　	　	　	　
+	13	クリアボタン	btnClear	I	　	　	　	　	button	　	　	　	　	　	　	　	　	　
+	14	発注一覧	tbl	　	　	　	　	　	　	　	　	　	　	　	　	　	　	表示順
+　発注日の降順
+表示件数
+　5件（5件以上は、ページング表示）
+	15	発注ID（システムID）	hdId	O	　	　	　	　	hidden	　	　	　	　	　	　	　	　	　
+	16	発注ID	lnkOrderId	I	　	10	left	　	link	　	　	　	　	　	　	　	　	　
+	17	発注日	lblOrderDate	O	　	　	left	yyyy/mm/dd	label	　	　	　	　	　	　	　	　	　
+	18	発注者	lblUser	O	　	　	left	　	label	　	　	　	　	　	　	　	　	　
+	19	発注方法	lblType	O	　	　	left	　	label	　	　	　	　	　	　	　	　	　
+	20	発注品番	lblNumber	O	　	　	left	　	label	　	　	　	　	　	　	　	　	紐付く品番をカンマ区切りで結合
+※品番の昇順で結合
+	21	合計金額	ｌblPrice	O	　	　	right	\#,##0	label	　	　	　	　	　	　	　	　	明細の単価×数量の合計値を表示
+	22	発注ステータス	lblStatus	O	　	　	left	　	label	　	　	　	　	　	　	　	　	　
+	23	ページング	　	　	　	　	　	　	　	　	　	　	　	　	　	　	　	Googleのようなイメージ（最大5ページ表示）
+	24	　	　	　	　	　	　	　	　	　	　	　	　	　	　	　	　	　
+
