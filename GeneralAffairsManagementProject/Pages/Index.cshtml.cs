@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Data.SqlClient;
 using System.Data;
 using GeneralAffairsManagementProject.Models;
+using System.Text.Json;
 
 namespace GeneralAffairsManagementProject.Pages
 {
@@ -56,9 +57,24 @@ namespace GeneralAffairsManagementProject.Pages
             // マスタデータ取得
             await LoadMasterDataAsync();
 
-            // 初期条件で検索
-            SearchCondition.IncludeExpiredNotDelivered = false;
-            await ExecuteSearchAsync();
+            // TempDataから検索結果を復元（クリア後のリダイレクトの場合）
+            if (TempData.ContainsKey("SearchResults") && TempData.ContainsKey("PagingInfo"))
+            {
+                var searchResultsJson = TempData["SearchResults"]?.ToString();
+                var pagingInfoJson = TempData["PagingInfo"]?.ToString();
+
+                if (!string.IsNullOrEmpty(searchResultsJson) && !string.IsNullOrEmpty(pagingInfoJson))
+                {
+                    SearchResults = JsonSerializer.Deserialize<List<OrderSearchResult>>(searchResultsJson) ?? new();
+                    PagingInfo = JsonSerializer.Deserialize<PagingInfo>(pagingInfoJson) ?? new();
+                }
+            }
+            else
+            {
+                // 初期条件で検索
+                SearchCondition.IncludeExpiredNotDelivered = false;
+                await ExecuteSearchAsync();
+            }
         }
 
         /// <summary>
@@ -72,12 +88,17 @@ namespace GeneralAffairsManagementProject.Pages
             // 入力チェック
             if (!ValidateSearchCondition())
             {
+                // バリデーションエラー時は前回の検索結果を復元
+                RestoreSearchResultsFromTempData();
                 return Page();
             }
 
             // 1ページ目を表示
             SearchCondition.CurrentPage = 1;
             await ExecuteSearchAsync();
+
+            // 検索結果をTempDataに保存（クリアボタン用）
+            SaveSearchResultsToTempData();
 
             return Page();
         }
@@ -87,17 +108,9 @@ namespace GeneralAffairsManagementProject.Pages
         /// </summary>
         public async Task<IActionResult> OnPostClearAsync()
         {
-            // マスタデータ取得
-            await LoadMasterDataAsync();
-
-            // 検索条件をクリア
-            SearchCondition = new OrderSearchCondition
-            {
-                IncludeExpiredNotDelivered = false
-            };
-
-            // 検索結果は更新しない（前回の結果を保持）
-            return Page();
+            // 検索結果をTempDataに保存してGETリクエストにリダイレクト
+            // （TempDataは次のリクエストまで保持される）
+            return RedirectToPage();
         }
 
         /// <summary>
@@ -111,6 +124,9 @@ namespace GeneralAffairsManagementProject.Pages
             // 指定ページで検索
             SearchCondition.CurrentPage = page;
             await ExecuteSearchAsync();
+
+            // 検索結果をTempDataに保存（クリアボタン用）
+            SaveSearchResultsToTempData();
 
             return Page();
         }
@@ -210,108 +226,8 @@ namespace GeneralAffairsManagementProject.Pages
                 if (conn.State != ConnectionState.Open)
                     await conn.OpenAsync();
 
-                // 検索条件構築
-                var whereClauses = new List<string> { "o.DELETE_FLAG = 0" };
-                var parameters = new List<SqlParameter>();
-
-                // 発注方法（消耗品マスタ経由で判定）
-                if (SearchCondition.OrderingMethodId.HasValue)
-                {
-                    whereClauses.Add(@"EXISTS (
-                        SELECT 1 
-                        FROM TD_ORDER_DETAILS od
-                        INNER JOIN TM_CONSUMABLES c ON od.CONSUMABLES_ID = c.ID
-                        INNER JOIN TM_CONSUMABLES_CATEGORY cc ON c.CATEGORY_ID = cc.ID
-                        WHERE od.ORDER_ID = o.ID 
-                        AND cc.METHOD_ID = @MethodId
-                        AND od.DELETE_FLAG = 0
-                    )");
-                    parameters.Add(new SqlParameter("@MethodId", SearchCondition.OrderingMethodId.Value));
-                }
-
-                // 発注者（前方一致）
-                if (!string.IsNullOrWhiteSpace(SearchCondition.OrderUser))
-                {
-                    whereClauses.Add("o.ORDER_USER_NAME LIKE @OrderUser");
-                    parameters.Add(new SqlParameter("@OrderUser", SearchCondition.OrderUser + "%"));
-                }
-
-                // 品目番号（前方一致）
-                if (!string.IsNullOrWhiteSpace(SearchCondition.ItemNumber))
-                {
-                    whereClauses.Add(@"EXISTS (
-                        SELECT 1 
-                        FROM TD_ORDER_DETAILS od
-                        INNER JOIN TM_CONSUMABLES c ON od.CONSUMABLES_ID = c.ID
-                        WHERE od.ORDER_ID = o.ID 
-                        AND c.ITEM_NO LIKE @ItemNumber
-                        AND od.DELETE_FLAG = 0
-                    )");
-                    parameters.Add(new SqlParameter("@ItemNumber", SearchCondition.ItemNumber + "%"));
-                }
-
-                // ステータス
-                if (SearchCondition.StatusId.HasValue)
-                {
-                    whereClauses.Add("o.ORDER_STATUS_ID = @StatusId");
-                    parameters.Add(new SqlParameter("@StatusId", SearchCondition.StatusId.Value));
-                }
-
-                // 発注日From
-                if (SearchCondition.OrderDateFrom.HasValue)
-                {
-                    whereClauses.Add("o.ORDER_DATE >= @OrderDateFrom");
-                    parameters.Add(new SqlParameter("@OrderDateFrom", SearchCondition.OrderDateFrom.Value.Date));
-                }
-
-                // 発注日To
-                if (SearchCondition.OrderDateTo.HasValue)
-                {
-                    whereClauses.Add("o.ORDER_DATE < @OrderDateTo");
-                    parameters.Add(new SqlParameter("@OrderDateTo", SearchCondition.OrderDateTo.Value.Date.AddDays(1)));
-                }
-
-                // 納品日From
-                if (SearchCondition.DeliveryDateFrom.HasValue)
-                {
-                    whereClauses.Add(@"EXISTS (
-                        SELECT 1 
-                        FROM TD_ORDER_DETAILS od
-                        WHERE od.ORDER_ID = o.ID 
-                        AND od.SCHEDULED_DELIVERY_DATE >= @DeliveryDateFrom
-                        AND od.DELETE_FLAG = 0
-                    )");
-                    parameters.Add(new SqlParameter("@DeliveryDateFrom", SearchCondition.DeliveryDateFrom.Value.Date));
-                }
-
-                // 納品日To
-                if (SearchCondition.DeliveryDateTo.HasValue)
-                {
-                    whereClauses.Add(@"EXISTS (
-                        SELECT 1 
-                        FROM TD_ORDER_DETAILS od
-                        WHERE od.ORDER_ID = o.ID 
-                        AND od.SCHEDULED_DELIVERY_DATE < @DeliveryDateTo
-                        AND od.DELETE_FLAG = 0
-                    )");
-                    parameters.Add(new SqlParameter("@DeliveryDateTo", SearchCondition.DeliveryDateTo.Value.Date.AddDays(1)));
-                }
-
-                // 有効期限切れ且つ未納品を含まない場合の除外条件
-                if (!SearchCondition.IncludeExpiredNotDelivered)
-                {
-                    whereClauses.Add(@"NOT EXISTS (
-                        SELECT 1 
-                        FROM TD_ORDER_DETAILS od
-                        INNER JOIN TM_CONSUMABLES c ON od.CONSUMABLES_ID = c.ID
-                        WHERE od.ORDER_ID = o.ID 
-                        AND c.EXPIRATION_DATE < GETDATE()
-                        AND od.DELIVERYED_FLAG = 0
-                        AND od.DELETE_FLAG = 0
-                    )");
-                }
-
-                var whereClause = string.Join(" AND ", whereClauses);
+                // 検索条件構築（WHERE句とパラメータを生成）
+                var (whereClause, parameterFactory) = BuildSearchCondition();
 
                 // 総件数取得
                 var countSql = $@"
@@ -321,7 +237,7 @@ namespace GeneralAffairsManagementProject.Pages
 
                 using (var cmd = new SqlCommand(countSql, conn))
                 {
-                    cmd.Parameters.AddRange(parameters.ToArray());
+                    cmd.Parameters.AddRange(parameterFactory().ToArray());
                     PagingInfo.TotalCount = (int)await cmd.ExecuteScalarAsync();
                     PagingInfo.CurrentPage = SearchCondition.CurrentPage;
                 }
@@ -364,7 +280,7 @@ namespace GeneralAffairsManagementProject.Pages
 
                 using (var cmd = new SqlCommand(dataSql, conn))
                 {
-                    cmd.Parameters.AddRange(parameters.ToArray());
+                    cmd.Parameters.AddRange(parameterFactory().ToArray());
                     cmd.Parameters.Add(new SqlParameter("@Offset", offset));
                     cmd.Parameters.Add(new SqlParameter("@PageSize", PagingInfo.PageSize));
 
@@ -385,6 +301,193 @@ namespace GeneralAffairsManagementProject.Pages
                             OrderingMethodName = reader.IsDBNull(7) ? string.Empty : reader.GetString(7)
                         });
                     }
+                }
+            }
+        }
+
+        /// <summary>
+        /// 検索条件を構築
+        /// </summary>
+        private (string whereClause, Func<List<SqlParameter>> parameterFactory) BuildSearchCondition()
+        {
+            var whereClauses = new List<string> { "o.DELETE_FLAG = 0" };
+
+            // パラメータを生成する関数を返す（呼び出すたびに新しいインスタンスを生成）
+            Func<List<SqlParameter>> createParameters = () =>
+            {
+                var parameters = new List<SqlParameter>();
+
+                // 発注方法（消耗品マスタ経由で判定）
+                if (SearchCondition.OrderingMethodId.HasValue)
+                {
+                    parameters.Add(new SqlParameter("@MethodId", SearchCondition.OrderingMethodId.Value));
+                }
+
+                // 発注者（前方一致）
+                if (!string.IsNullOrWhiteSpace(SearchCondition.OrderUser))
+                {
+                    parameters.Add(new SqlParameter("@OrderUser", SearchCondition.OrderUser + "%"));
+                }
+
+                // 品目番号（前方一致）
+                if (!string.IsNullOrWhiteSpace(SearchCondition.ItemNumber))
+                {
+                    parameters.Add(new SqlParameter("@ItemNumber", SearchCondition.ItemNumber + "%"));
+                }
+
+                // ステータス
+                if (SearchCondition.StatusId.HasValue)
+                {
+                    parameters.Add(new SqlParameter("@StatusId", SearchCondition.StatusId.Value));
+                }
+
+                // 発注日From
+                if (SearchCondition.OrderDateFrom.HasValue)
+                {
+                    parameters.Add(new SqlParameter("@OrderDateFrom", SearchCondition.OrderDateFrom.Value.Date));
+                }
+
+                // 発注日To
+                if (SearchCondition.OrderDateTo.HasValue)
+                {
+                    parameters.Add(new SqlParameter("@OrderDateTo", SearchCondition.OrderDateTo.Value.Date.AddDays(1)));
+                }
+
+                // 納品日From
+                if (SearchCondition.DeliveryDateFrom.HasValue)
+                {
+                    parameters.Add(new SqlParameter("@DeliveryDateFrom", SearchCondition.DeliveryDateFrom.Value.Date));
+                }
+
+                // 納品日To
+                if (SearchCondition.DeliveryDateTo.HasValue)
+                {
+                    parameters.Add(new SqlParameter("@DeliveryDateTo", SearchCondition.DeliveryDateTo.Value.Date.AddDays(1)));
+                }
+
+                return parameters;
+            };
+
+            // 発注方法（消耗品マスタ経由で判定）
+            if (SearchCondition.OrderingMethodId.HasValue)
+            {
+                whereClauses.Add(@"EXISTS (
+                    SELECT 1 
+                    FROM TD_ORDER_DETAILS od
+                    INNER JOIN TM_CONSUMABLES c ON od.CONSUMABLES_ID = c.ID
+                    INNER JOIN TM_CONSUMABLES_CATEGORY cc ON c.CATEGORY_ID = cc.ID
+                    WHERE od.ORDER_ID = o.ID 
+                    AND cc.METHOD_ID = @MethodId
+                    AND od.DELETE_FLAG = 0
+                )");
+            }
+
+            // 発注者（前方一致）
+            if (!string.IsNullOrWhiteSpace(SearchCondition.OrderUser))
+            {
+                whereClauses.Add("o.ORDER_USER_NAME LIKE @OrderUser");
+            }
+
+            // 品目番号（前方一致）
+            if (!string.IsNullOrWhiteSpace(SearchCondition.ItemNumber))
+            {
+                whereClauses.Add(@"EXISTS (
+                    SELECT 1 
+                    FROM TD_ORDER_DETAILS od
+                    INNER JOIN TM_CONSUMABLES c ON od.CONSUMABLES_ID = c.ID
+                    WHERE od.ORDER_ID = o.ID 
+                    AND c.ITEM_NO LIKE @ItemNumber
+                    AND od.DELETE_FLAG = 0
+                )");
+            }
+
+            // ステータス
+            if (SearchCondition.StatusId.HasValue)
+            {
+                whereClauses.Add("o.ORDER_STATUS_ID = @StatusId");
+            }
+
+            // 発注日From
+            if (SearchCondition.OrderDateFrom.HasValue)
+            {
+                whereClauses.Add("o.ORDER_DATE >= @OrderDateFrom");
+            }
+
+            // 発注日To
+            if (SearchCondition.OrderDateTo.HasValue)
+            {
+                whereClauses.Add("o.ORDER_DATE < @OrderDateTo");
+            }
+
+            // 納品日From
+            if (SearchCondition.DeliveryDateFrom.HasValue)
+            {
+                whereClauses.Add(@"EXISTS (
+                    SELECT 1 
+                    FROM TD_ORDER_DETAILS od
+                    WHERE od.ORDER_ID = o.ID 
+                    AND od.SCHEDULED_DELIVERY_DATE >= @DeliveryDateFrom
+                    AND od.DELETE_FLAG = 0
+                )");
+            }
+
+            // 納品日To
+            if (SearchCondition.DeliveryDateTo.HasValue)
+            {
+                whereClauses.Add(@"EXISTS (
+                    SELECT 1 
+                    FROM TD_ORDER_DETAILS od
+                    WHERE od.ORDER_ID = o.ID 
+                    AND od.SCHEDULED_DELIVERY_DATE < @DeliveryDateTo
+                    AND od.DELETE_FLAG = 0
+                )");
+            }
+
+            // 有効期限切れ且つ未納品を含まない場合の除外条件
+            if (!SearchCondition.IncludeExpiredNotDelivered)
+            {
+                whereClauses.Add(@"NOT EXISTS (
+                    SELECT 1 
+                    FROM TD_ORDER_DETAILS od
+                    INNER JOIN TM_CONSUMABLES c ON od.CONSUMABLES_ID = c.ID
+                    WHERE od.ORDER_ID = o.ID 
+                    AND c.EXPIRATION_DATE < GETDATE()
+                    AND od.DELIVERYED_FLAG = 0
+                    AND od.DELETE_FLAG = 0
+                )");
+            }
+
+            var whereClause = string.Join(" AND ", whereClauses);
+            return (whereClause, createParameters);
+        }
+
+        /// <summary>
+        /// 検索結果をTempDataに保存
+        /// </summary>
+        private void SaveSearchResultsToTempData()
+        {
+            TempData["SearchResults"] = JsonSerializer.Serialize(SearchResults);
+            TempData["PagingInfo"] = JsonSerializer.Serialize(PagingInfo);
+        }
+
+        /// <summary>
+        /// TempDataから検索結果を復元
+        /// </summary>
+        private void RestoreSearchResultsFromTempData()
+        {
+            if (TempData.ContainsKey("SearchResults") && TempData.ContainsKey("PagingInfo"))
+            {
+                var searchResultsJson = TempData["SearchResults"]?.ToString();
+                var pagingInfoJson = TempData["PagingInfo"]?.ToString();
+
+                if (!string.IsNullOrEmpty(searchResultsJson) && !string.IsNullOrEmpty(pagingInfoJson))
+                {
+                    SearchResults = JsonSerializer.Deserialize<List<OrderSearchResult>>(searchResultsJson) ?? new();
+                    PagingInfo = JsonSerializer.Deserialize<PagingInfo>(pagingInfoJson) ?? new();
+
+                    // TempDataを再保存（次回も使えるように）
+                    TempData["SearchResults"] = searchResultsJson;
+                    TempData["PagingInfo"] = pagingInfoJson;
                 }
             }
         }

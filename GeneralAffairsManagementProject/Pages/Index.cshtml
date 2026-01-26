@@ -9,9 +9,6 @@
 <form method="post">
     <!-- 検索条件 -->
     <div class="card mb-4">
-        <div class="card-header">
-            <h5 class="mb-0">検索条件</h5>
-        </div>
         <div class="card-body">
             <div class="row g-3">
                 <!-- 発注方法 -->
@@ -113,9 +110,8 @@
 
     <!-- 検索結果 -->
     <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
+        <div class="card-header">
             <h5 class="mb-0">発注一覧</h5>
-            <span class="badge bg-secondary">全 @Model.PagingInfo.TotalCount 件</span>
         </div>
         <div class="card-body">
             @if (Model.SearchResults.Any())
@@ -213,13 +209,6 @@
                             </li>
                         </ul>
                     </nav>
-
-                    <div class="text-center mt-2">
-                        <small class="text-muted">
-                            @Model.PagingInfo.CurrentPage / @Model.PagingInfo.TotalPages ページ
-                            （@((Model.PagingInfo.CurrentPage - 1) * Model.PagingInfo.PageSize + 1)〜@Math.Min(Model.PagingInfo.CurrentPage * Model.PagingInfo.PageSize, Model.PagingInfo.TotalCount) 件目を表示）
-                        </small>
-                    </div>
                 }
             }
             else
@@ -243,7 +232,7 @@
             });
         });
     </script>
-}       
+}
 
 
 
