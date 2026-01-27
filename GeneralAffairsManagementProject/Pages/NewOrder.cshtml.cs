@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Data.SqlClient;
 using System.ComponentModel.DataAnnotations;
+using GeneralAffairsManagementProject.Utils;
 
 namespace GeneralAffairsManagementProject.Pages
 {
@@ -34,20 +35,17 @@ namespace GeneralAffairsManagementProject.Pages
 
         public IActionResult OnPost()
         {
-            // クライアント側の required などに対応する
             if (!ModelState.IsValid)
             {
                 return Page();
             }
 
-            // 接続文字列
             string connStr = _configuration.GetConnectionString("GeneralAffairsDb");
-
-            // 発注番号（重複しないように秒まで使う）
             string orderNo = DateTime.Now.ToString("yyyyMMddHHmmss");
-
-            // 発注者名（ログインユーザー名 or system）
             string orderUserName = User.Identity?.Name ?? "system";
+
+            // JSTの現在時刻を取得
+            DateTime jstNow = DateTimeUtils.GetJstNow();
 
             try
             {
@@ -92,6 +90,8 @@ namespace GeneralAffairsManagementProject.Pages
 INSERT INTO TD_ORDER
     (ORDER_NO,
      ORDER_DATE,
+     CREATE_DATETIME,
+     UPDATE_DATETIME,
      ORDER_USER_NAME,
      CONTACT_ORDER_NAME,
      ORDER_NOTE,
@@ -100,13 +100,17 @@ OUTPUT INSERTED.ID
 VALUES
     (@OrderNo,
      @OrderDate,
+     @CreateDateTime,
+     @UpdateDateTime,
      @OrderUserName,
      @ContactOrderName,
      NULL,
      1);", conn, tran))
                 {
                     cmd.Parameters.AddWithValue("@OrderNo", orderNo);
-                    cmd.Parameters.AddWithValue("@OrderDate", DateTime.Now);
+                    cmd.Parameters.AddWithValue("@OrderDate", jstNow);         // ORDER_DATE
+                    cmd.Parameters.AddWithValue("@CreateDateTime", jstNow);    // CREATE_DATETIME
+                    cmd.Parameters.AddWithValue("@UpdateDateTime", jstNow);    // UPDATE_DATETIME
                     cmd.Parameters.AddWithValue("@OrderUserName", orderUserName);
                     cmd.Parameters.AddWithValue("@ContactOrderName", orderUserName);
 
@@ -141,7 +145,7 @@ VALUES
                     cmd.Parameters.AddWithValue("@OrderQuantity", Quantity);
 
                     // ★ 単位名：今回は単位の概念を使わないので、固定で「なし」を入れる
-                    cmd.Parameters.AddWithValue("@OrderUnitName", "なし");
+                    cmd.Parameters.AddWithValue("@OrderUnitName", "NoData"); // もしくは "none" など
 
                     cmd.Parameters.AddWithValue("@UnitPrice", unitPrice);
 
