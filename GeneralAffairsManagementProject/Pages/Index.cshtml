@@ -61,7 +61,7 @@
 
                 <!-- 発注日From -->
                 <div class="col-md-6">
-                    <label asp-for="SearchCondition.OrderDateFrom" class="form-label">発注日（From）</label>
+                    <label asp-for="SearchCondition.OrderDateFrom" class="form-label">発注日(From)</label>
                     <input asp-for="SearchCondition.OrderDateFrom" class="form-control" type="date" />
                     @if (Model.ValidationErrors.ContainsKey("OrderDate"))
                     {
@@ -73,13 +73,13 @@
 
                 <!-- 発注日To -->
                 <div class="col-md-6">
-                    <label asp-for="SearchCondition.OrderDateTo" class="form-label">発注日（To）</label>
+                    <label asp-for="SearchCondition.OrderDateTo" class="form-label">発注日(To)</label>
                     <input asp-for="SearchCondition.OrderDateTo" class="form-control" type="date" />
                 </div>
 
                 <!-- 納品日From -->
                 <div class="col-md-6">
-                    <label asp-for="SearchCondition.DeliveryDateFrom" class="form-label">納品日（From）</label>
+                    <label asp-for="SearchCondition.DeliveryDateFrom" class="form-label">納品日(From)</label>
                     <input asp-for="SearchCondition.DeliveryDateFrom" class="form-control" type="date" />
                     @if (Model.ValidationErrors.ContainsKey("DeliveryDate"))
                     {
@@ -91,7 +91,7 @@
 
                 <!-- 納品日To -->
                 <div class="col-md-6">
-                    <label asp-for="SearchCondition.DeliveryDateTo" class="form-label">納品日（To）</label>
+                    <label asp-for="SearchCondition.DeliveryDateTo" class="form-label">納品日(To)</label>
                     <input asp-for="SearchCondition.DeliveryDateTo" class="form-control" type="date" />
                 </div>
 
@@ -155,60 +155,39 @@
                 <!-- ページング -->
                 @if (Model.PagingInfo.TotalPages > 1)
                 {
-                    <nav aria-label="検索結果ページング" class="mt-3">
-                        <ul class="pagination justify-content-center mb-0">
-                            <!-- 前へ -->
-                            <li class="page-item @(!Model.PagingInfo.HasPreviousPage ? "disabled" : "")">
-                                @if (Model.PagingInfo.HasPreviousPage)
-                                {
-                                    <button type="submit" asp-page-handler="Page" asp-route-page="@(Model.PagingInfo.CurrentPage - 1)"
-                                            class="page-link">
-                                        <i class="bi bi-chevron-left"></i> 前へ
-                                    </button>
-                                }
-                                else
-                                {
-                                    <span class="page-link">
-                                        <i class="bi bi-chevron-left"></i> 前へ
-                                    </span>
-                                }
-                            </li>
-
-                            <!-- ページ番号 -->
+                    <div class="paging-container">
+                        <ul class="paging-list">
                             @foreach (var pageNumber in Model.PagingInfo.PageNumbers)
                             {
-                                <li class="page-item @(pageNumber == Model.PagingInfo.CurrentPage ? "active" : "")">
+                                <li class="paging-item">
                                     @if (pageNumber == Model.PagingInfo.CurrentPage)
                                     {
-                                        <span class="page-link">@pageNumber</span>
+                                        <span class="paging-link active">@pageNumber</span>
                                     }
                                     else
                                     {
-                                        <button type="submit" asp-page-handler="Page" asp-route-page="@pageNumber" class="page-link">
+                                        <button type="submit" name="page" value="@pageNumber" asp-page-handler="Page" class="paging-link">
                                             @pageNumber
                                         </button>
                                     }
                                 </li>
                             }
-
-                            <!-- 次へ -->
-                            <li class="page-item @(!Model.PagingInfo.HasNextPage ? "disabled" : "")">
-                                @if (Model.PagingInfo.HasNextPage)
-                                {
-                                    <button type="submit" asp-page-handler="Page" asp-route-page="@(Model.PagingInfo.CurrentPage + 1)"
-                                            class="page-link">
-                                        次へ <i class="bi bi-chevron-right"></i>
+                            @if (Model.PagingInfo.HasNextPage)
+                            {
+                                <li class="paging-item">
+                                    <button type="submit" name="page" value="@(Model.PagingInfo.CurrentPage + 1)" asp-page-handler="Page" class="paging-link">
+                                        &gt;
                                     </button>
-                                }
-                                else
-                                {
-                                    <span class="page-link">
-                                        次へ <i class="bi bi-chevron-right"></i>
-                                    </span>
-                                }
-                            </li>
+                                </li>
+                            }
+                            else
+                            {
+                                <li class="paging-item">
+                                    <span class="paging-link disabled">&gt;</span>
+                                </li>
+                            }
                         </ul>
-                    </nav>
+                    </div>
                 }
             }
             else
