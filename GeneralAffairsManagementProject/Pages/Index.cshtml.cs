@@ -54,16 +54,28 @@ namespace GeneralAffairsManagementProject.Pages
         /// </summary>
         public async Task OnGetAsync()
         {
-            // マスタデータ取得
-            await LoadMasterDataAsync();
-
-            // 初期条件で検索
-            SearchCondition.IncludeExpiredNotDelivered = false;
-            await ExecuteSearchAsync();
+            _logger.LogInformation("発注一覧画面の初期表示を開始しました。");
             
-            // 初回検索結果を保存
-            SaveSearchConditionToTempData();
-            SaveSearchResultsToTempData();
+            try
+            {
+                // マスタデータ取得
+                await LoadMasterDataAsync();
+
+                // 初期条件で検索
+                SearchCondition.IncludeExpiredNotDelivered = false;
+                await ExecuteSearchAsync();
+                
+                // 初回検索結果を保存
+                SaveSearchConditionToTempData();
+                SaveSearchResultsToTempData();
+                
+                _logger.LogInformation("初期表示が完了しました。検索結果: {ResultCount}件", SearchResults.Count);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "初期表示処理でエラーが発生しました。");
+                throw;
+            }
         }
 
         /// <summary>
@@ -71,26 +83,40 @@ namespace GeneralAffairsManagementProject.Pages
         /// </summary>
         public async Task<IActionResult> OnPostSearchAsync()
         {
-            // マスタデータ取得
-            await LoadMasterDataAsync();
-
-            // 入力チェック
-            if (!ValidateSearchCondition())
+            _logger.LogInformation("検索処理を開始しました。検索条件: {@SearchCondition}", SearchCondition);
+            
+            try
             {
-                // バリデーションエラー時は以前の検索結果を復元
-                RestoreSearchResultsFromTempData();
+                // マスタデータ取得
+                await LoadMasterDataAsync();
+
+                // 入力チェック
+                if (!ValidateSearchCondition())
+                {
+                    _logger.LogWarning("検索条件のバリデーションエラーが発生しました。エラー内容: {@ValidationErrors}", ValidationErrors);
+                    // バリデーションエラー時は以前の検索結果を復元
+                    RestoreSearchResultsFromTempData();
+                    return Page();
+                }
+
+                // 1ページ目を表示
+                SearchCondition.CurrentPage = 1;
+                await ExecuteSearchAsync();
+
+                // 検索条件と結果をTempDataに保存
+                SaveSearchConditionToTempData();
+                SaveSearchResultsToTempData();
+
+                _logger.LogInformation("検索処理が完了しました。検索結果: {ResultCount}件 / 総件数: {TotalCount}件", 
+                    SearchResults.Count, PagingInfo.TotalCount);
+
                 return Page();
             }
-
-            // 1ページ目を表示
-            SearchCondition.CurrentPage = 1;
-            await ExecuteSearchAsync();
-
-            // 検索条件と結果をTempDataに保存
-            SaveSearchConditionToTempData();
-            SaveSearchResultsToTempData();
-
-            return Page();
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "検索処理でエラーが発生しました。検索条件: {@SearchCondition}", SearchCondition);
+                throw;
+            }
         }
 
         /// <summary>
@@ -98,26 +124,38 @@ namespace GeneralAffairsManagementProject.Pages
         /// </summary>
         public IActionResult OnPostClear()
         {
-            // マスタデータ取得（同期版）
-            LoadMasterData();
-
-            // TempDataから検索結果を復元
-            RestoreSearchResultsFromTempData();
-
-            // 検索条件をクリア（モデルバインディング前の状態に戻す）
-            ModelState.Clear();
-            SearchCondition = new OrderSearchCondition
-            {
-                IncludeExpiredNotDelivered = false
-            };
-
-            // 検索結果はTempDataに再保存（次回のために保持）
-            SaveSearchResultsToTempData();
+            _logger.LogInformation("検索条件のクリア処理を開始しました。");
             
-            // 検索条件はクリアしたのでTempDataから削除
-            TempData.Remove("SearchCondition");
+            try
+            {
+                // マスタデータ取得（同期版）
+                LoadMasterData();
 
-            return Page();
+                // TempDataから検索結果を復元
+                RestoreSearchResultsFromTempData();
+
+                // 検索条件をクリア（モデルバインディング前の状態に戻す）
+                ModelState.Clear();
+                SearchCondition = new OrderSearchCondition
+                {
+                    IncludeExpiredNotDelivered = false
+                };
+
+                // 検索結果はTempDataに再保存（次回のために保持）
+                SaveSearchResultsToTempData();
+                
+                // 検索条件はクリアしたのでTempDataから削除
+                TempData.Remove("SearchCondition");
+
+                _logger.LogInformation("検索条件のクリア処理が完了しました。");
+
+                return Page();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "検索条件のクリア処理でエラーが発生しました。");
+                throw;
+            }
         }
 
         /// <summary>
@@ -125,21 +163,34 @@ namespace GeneralAffairsManagementProject.Pages
         /// </summary>
         public async Task<IActionResult> OnPostPageAsync(int page)
         {
-            // マスタデータ取得
-            await LoadMasterDataAsync();
+            _logger.LogInformation("ページング処理を開始しました。ページ番号: {PageNumber}", page);
+            
+            try
+            {
+                // マスタデータ取得
+                await LoadMasterDataAsync();
 
-            // TempDataから検索条件を復元
-            RestoreSearchConditionFromTempData();
+                // TempDataから検索条件を復元
+                RestoreSearchConditionFromTempData();
 
-            // 指定ページで検索
-            SearchCondition.CurrentPage = page;
-            await ExecuteSearchAsync();
+                // 指定ページで検索
+                SearchCondition.CurrentPage = page;
+                await ExecuteSearchAsync();
 
-            // 検索条件と結果を再保存
-            SaveSearchConditionToTempData();
-            SaveSearchResultsToTempData();
+                // 検索条件と結果を再保存
+                SaveSearchConditionToTempData();
+                SaveSearchResultsToTempData();
 
-            return Page();
+                _logger.LogInformation("ページング処理が完了しました。ページ番号: {PageNumber}, 表示件数: {ResultCount}件", 
+                    page, SearchResults.Count);
+
+                return Page();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "ページング処理でエラーが発生しました。ページ番号: {PageNumber}", page);
+                throw;
+            }
         }
 
         /// <summary>
