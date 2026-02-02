@@ -1,8 +1,10 @@
-
 using System.Data;
 using Microsoft.Data.SqlClient;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Application Insights ‚Ì’Ç‰Á
+builder.Services.AddApplicationInsightsTelemetry();
 
 // Add services to the container.
 builder.Services.AddRazorPages();
