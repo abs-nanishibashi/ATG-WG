@@ -54,7 +54,7 @@ namespace GeneralAffairsManagementProject.Pages
         /// </summary>
         public async Task OnGetAsync()
         {
-            _logger.LogInformation("発注一覧画面の初期表示を開始しました。");
+            _logger.LogInformation("Order list initial display started.");
             
             try
             {
@@ -69,11 +69,11 @@ namespace GeneralAffairsManagementProject.Pages
                 SaveSearchConditionToTempData();
                 SaveSearchResultsToTempData();
                 
-                _logger.LogInformation("初期表示が完了しました。検索結果: {ResultCount}件", SearchResults.Count);
+                _logger.LogInformation("Initial display completed. Result count: {ResultCount}", SearchResults.Count);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "初期表示処理でエラーが発生しました。");
+                _logger.LogError(ex, "Error occurred during initial display.");
                 throw;
             }
         }
@@ -83,7 +83,7 @@ namespace GeneralAffairsManagementProject.Pages
         /// </summary>
         public async Task<IActionResult> OnPostSearchAsync()
         {
-            _logger.LogInformation("検索処理を開始しました。検索条件: {@SearchCondition}", SearchCondition);
+            _logger.LogInformation("Search started. Condition: {@SearchCondition}", SearchCondition);
             
             try
             {
@@ -93,7 +93,7 @@ namespace GeneralAffairsManagementProject.Pages
                 // 入力チェック
                 if (!ValidateSearchCondition())
                 {
-                    _logger.LogWarning("検索条件のバリデーションエラーが発生しました。エラー内容: {@ValidationErrors}", ValidationErrors);
+                    _logger.LogWarning("Validation error occurred. Errors: {@ValidationErrors}", ValidationErrors);
                     // バリデーションエラー時は以前の検索結果を復元
                     RestoreSearchResultsFromTempData();
                     return Page();
@@ -107,14 +107,14 @@ namespace GeneralAffairsManagementProject.Pages
                 SaveSearchConditionToTempData();
                 SaveSearchResultsToTempData();
 
-                _logger.LogInformation("検索処理が完了しました。検索結果: {ResultCount}件 / 総件数: {TotalCount}件", 
+                _logger.LogInformation("Search completed. Result count: {ResultCount}, Total count: {TotalCount}", 
                     SearchResults.Count, PagingInfo.TotalCount);
 
                 return Page();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "検索処理でエラーが発生しました。検索条件: {@SearchCondition}", SearchCondition);
+                _logger.LogError(ex, "Error occurred during search. Condition: {@SearchCondition}", SearchCondition);
                 throw;
             }
         }
@@ -124,7 +124,7 @@ namespace GeneralAffairsManagementProject.Pages
         /// </summary>
         public IActionResult OnPostClear()
         {
-            _logger.LogInformation("検索条件のクリア処理を開始しました。");
+            _logger.LogInformation("Clear search condition started.");
             
             try
             {
@@ -147,13 +147,13 @@ namespace GeneralAffairsManagementProject.Pages
                 // 検索条件はクリアしたのでTempDataから削除
                 TempData.Remove("SearchCondition");
 
-                _logger.LogInformation("検索条件のクリア処理が完了しました。");
+                _logger.LogInformation("Clear search condition completed.");
 
                 return Page();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "検索条件のクリア処理でエラーが発生しました。");
+                _logger.LogError(ex, "Error occurred during clearing search condition.");
                 throw;
             }
         }
@@ -163,7 +163,7 @@ namespace GeneralAffairsManagementProject.Pages
         /// </summary>
         public async Task<IActionResult> OnPostPageAsync(int page)
         {
-            _logger.LogInformation("ページング処理を開始しました。ページ番号: {PageNumber}", page);
+            _logger.LogInformation("Paging started. Page: {PageNumber}", page);
             
             try
             {
@@ -181,14 +181,14 @@ namespace GeneralAffairsManagementProject.Pages
                 SaveSearchConditionToTempData();
                 SaveSearchResultsToTempData();
 
-                _logger.LogInformation("ページング処理が完了しました。ページ番号: {PageNumber}, 表示件数: {ResultCount}件", 
+                _logger.LogInformation("Paging completed. Page: {PageNumber}, Result count: {ResultCount}",
                     page, SearchResults.Count);
 
                 return Page();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "ページング処理でエラーが発生しました。ページ番号: {PageNumber}", page);
+                _logger.LogError(ex, "Error occurred during paging. Page: {PageNumber}", page);
                 throw;
             }
         }
