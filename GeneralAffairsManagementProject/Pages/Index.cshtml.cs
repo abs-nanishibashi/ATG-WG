@@ -19,38 +19,38 @@ namespace GeneralAffairsManagementProject.Pages
         }
 
         /// <summary>
-        /// 検索条件
+        /// �������
         /// </summary>
         [BindProperty]
         public OrderSearchCondition SearchCondition { get; set; } = new();
 
         /// <summary>
-        /// 検索結果
+        /// ��������
         /// </summary>
         public List<OrderSearchResult> SearchResults { get; set; } = new();
 
         /// <summary>
-        /// ページング情報
+        /// �y�[�W���O���
         /// </summary>
         public PagingInfo PagingInfo { get; set; } = new();
 
         /// <summary>
-        /// 発注方法リスト
+        /// �������@���X�g
         /// </summary>
         public List<OrderingMethod> OrderingMethods { get; set; } = new();
 
         /// <summary>
-        /// ステータスリスト
+        /// �X�e�[�^�X���X�g
         /// </summary>
         public List<OrderStatus> OrderStatuses { get; set; } = new();
 
         /// <summary>
-        /// バリデーションエラーメッセージ
+        /// �o���f�[�V�����G���[���b�Z�[�W
         /// </summary>
         public Dictionary<string, string> ValidationErrors { get; set; } = new();
 
         /// <summary>
-        /// 初期表示
+        /// �����\��
         /// </summary>
         public async Task OnGetAsync()
         {
@@ -58,14 +58,14 @@ namespace GeneralAffairsManagementProject.Pages
             
             try
             {
-                // マスタデータ取得
+                // �}�X�^�f�[�^�擾
                 await LoadMasterDataAsync();
 
-                // 初期条件で検索
+                // ��������Ō���
                 SearchCondition.IncludeExpiredNotDelivered = false;
                 await ExecuteSearchAsync();
                 
-                // 初回検索結果を保存
+                // ���񌟍����ʂ�ۑ�
                 SaveSearchConditionToTempData();
                 SaveSearchResultsToTempData();
                 
@@ -79,7 +79,7 @@ namespace GeneralAffairsManagementProject.Pages
         }
 
         /// <summary>
-        /// 検索ボタン押下
+        /// �����{�^������
         /// </summary>
         public async Task<IActionResult> OnPostSearchAsync()
         {
@@ -87,23 +87,23 @@ namespace GeneralAffairsManagementProject.Pages
             
             try
             {
-                // マスタデータ取得
+                // �}�X�^�f�[�^�擾
                 await LoadMasterDataAsync();
 
-                // 入力チェック
+                // ���̓`�F�b�N
                 if (!ValidateSearchCondition())
                 {
                     _logger.LogWarning("Validation error occurred. Errors: {@ValidationErrors}", ValidationErrors);
-                    // バリデーションエラー時は以前の検索結果を復元
+                    // �o���f�[�V�����G���[���͈ȑO�̌������ʂ𕜌�
                     RestoreSearchResultsFromTempData();
                     return Page();
                 }
 
-                // 1ページ目を表示
+                // 1�y�[�W�ڂ�\��
                 SearchCondition.CurrentPage = 1;
                 await ExecuteSearchAsync();
 
-                // 検索条件と結果をTempDataに保存
+                // ��������ƌ��ʂ�TempData�ɕۑ�
                 SaveSearchConditionToTempData();
                 SaveSearchResultsToTempData();
 
@@ -120,7 +120,7 @@ namespace GeneralAffairsManagementProject.Pages
         }
 
         /// <summary>
-        /// クリアボタン押下
+        /// �N���A�{�^������
         /// </summary>
         public IActionResult OnPostClear()
         {
@@ -128,23 +128,23 @@ namespace GeneralAffairsManagementProject.Pages
             
             try
             {
-                // マスタデータ取得（同期版）
+                // �}�X�^�f�[�^�擾�i�����Łj
                 LoadMasterData();
 
-                // TempDataから検索結果を復元
+                // TempData���猟�����ʂ𕜌�
                 RestoreSearchResultsFromTempData();
 
-                // 検索条件をクリア（モデルバインディング前の状態に戻す）
+                // ���������N���A�i���f���o�C���f�B���O�O�̏�Ԃɖ߂��j
                 ModelState.Clear();
                 SearchCondition = new OrderSearchCondition
                 {
                     IncludeExpiredNotDelivered = false
                 };
 
-                // 検索結果はTempDataに再保存（次回のために保持）
+                // �������ʂ�TempData�ɍĕۑ��i����̂��߂ɕێ��j
                 SaveSearchResultsToTempData();
                 
-                // 検索条件はクリアしたのでTempDataから削除
+                // ��������̓N���A�����̂�TempData����폜
                 TempData.Remove("SearchCondition");
 
                 _logger.LogInformation("Clear search condition completed.");
@@ -159,7 +159,7 @@ namespace GeneralAffairsManagementProject.Pages
         }
 
         /// <summary>
-        /// ページング押下
+        /// �y�[�W���O����
         /// </summary>
         public async Task<IActionResult> OnPostPageAsync(int page)
         {
@@ -167,17 +167,17 @@ namespace GeneralAffairsManagementProject.Pages
             
             try
             {
-                // マスタデータ取得
+                // �}�X�^�f�[�^�擾
                 await LoadMasterDataAsync();
 
-                // TempDataから検索条件を復元
+                // TempData���猟������𕜌�
                 RestoreSearchConditionFromTempData();
 
-                // 指定ページで検索
+                // �w��y�[�W�Ō���
                 SearchCondition.CurrentPage = page;
                 await ExecuteSearchAsync();
 
-                // 検索条件と結果を再保存
+                // ��������ƌ��ʂ�ĕۑ�
                 SaveSearchConditionToTempData();
                 SaveSearchResultsToTempData();
 
@@ -194,7 +194,7 @@ namespace GeneralAffairsManagementProject.Pages
         }
 
         /// <summary>
-        /// マスタデータ取得（同期版）
+        /// �}�X�^�f�[�^�擾�i�����Łj
         /// </summary>
         private void LoadMasterData()
         {
@@ -203,7 +203,7 @@ namespace GeneralAffairsManagementProject.Pages
                 if (conn.State != ConnectionState.Open)
                     conn.Open();
 
-                // 発注方法マスタ取得
+                // �������@�}�X�^�擾
                 const string methodSql = @"
                     SELECT ID, NAME
                     FROM TM_ORDERING_METHOD
@@ -224,7 +224,7 @@ namespace GeneralAffairsManagementProject.Pages
                     }
                 }
 
-                // 発注ステータスマスタ取得
+                // �����X�e�[�^�X�}�X�^�擾
                 const string statusSql = @"
                     SELECT ID, ORDER_STATUS_NAME
                     FROM TM_ORDER_STATUS
@@ -248,7 +248,7 @@ namespace GeneralAffairsManagementProject.Pages
         }
 
         /// <summary>
-        /// マスタデータ取得
+        /// �}�X�^�f�[�^�擾
         /// </summary>
         private async Task LoadMasterDataAsync()
         {
@@ -257,7 +257,7 @@ namespace GeneralAffairsManagementProject.Pages
                 if (conn.State != ConnectionState.Open)
                     await conn.OpenAsync();
 
-                // 発注方法マスタ取得
+                // �������@�}�X�^�擾
                 const string methodSql = @"
                     SELECT ID, NAME
                     FROM TM_ORDERING_METHOD
@@ -278,7 +278,7 @@ namespace GeneralAffairsManagementProject.Pages
                     }
                 }
 
-                // 発注ステータスマスタ取得
+                // �����X�e�[�^�X�}�X�^�擾
                 const string statusSql = @"
                     SELECT ID, ORDER_STATUS_NAME
                     FROM TM_ORDER_STATUS
@@ -302,29 +302,29 @@ namespace GeneralAffairsManagementProject.Pages
         }
 
         /// <summary>
-        /// 入力チェック
+        /// ���̓`�F�b�N
         /// </summary>
         private bool ValidateSearchCondition()
         {
             ValidationErrors.Clear();
             bool isValid = true;
 
-            // 発注日チェック
+            // �������`�F�b�N
             if (SearchCondition.OrderDateFrom.HasValue && SearchCondition.OrderDateTo.HasValue)
             {
                 if (SearchCondition.OrderDateFrom.Value > SearchCondition.OrderDateTo.Value)
                 {
-                    ValidationErrors["OrderDate"] = "発注日(From)は発注日(To)以前の日付を指定してください。";
+                    ValidationErrors["OrderDate"] = "������(From)�͔�����(To)�ȑO�̓��t��w�肵�Ă��������B";
                     isValid = false;
                 }
             }
 
-            // 納品日チェック
+            // �[�i���`�F�b�N
             if (SearchCondition.DeliveryDateFrom.HasValue && SearchCondition.DeliveryDateTo.HasValue)
             {
                 if (SearchCondition.DeliveryDateFrom.Value > SearchCondition.DeliveryDateTo.Value)
                 {
-                    ValidationErrors["DeliveryDate"] = "納品日(From)は納品日(To)以前の日付を指定してください。";
+                    ValidationErrors["DeliveryDate"] = "�[�i��(From)�͔[�i��(To)�ȑO�̓��t��w�肵�Ă��������B";
                     isValid = false;
                 }
             }
@@ -333,7 +333,7 @@ namespace GeneralAffairsManagementProject.Pages
         }
 
         /// <summary>
-        /// 検索実行
+        /// �������s
         /// </summary>
         private async Task ExecuteSearchAsync()
         {
@@ -342,10 +342,10 @@ namespace GeneralAffairsManagementProject.Pages
                 if (conn.State != ConnectionState.Open)
                     await conn.OpenAsync();
 
-                // 検索条件構築(WHERE句とパラメータを生成)
+                // ��������\�z(WHERE��ƃp�����[�^�𐶐�)
                 var (whereClause, parameterFactory) = BuildSearchCondition();
 
-                // 総件数取得
+                // �������擾
                 var countSql = $@"
                     SELECT COUNT(*)
                     FROM TD_ORDER o
@@ -359,7 +359,7 @@ namespace GeneralAffairsManagementProject.Pages
                     PagingInfo.CurrentPage = SearchCondition.CurrentPage;
                 }
 
-                // データ取得(ページング)
+                // �f�[�^�擾(�y�[�W���O)
                 var offset = (SearchCondition.CurrentPage - 1) * PagingInfo.PageSize;
                 var dataSql = $@"
                     SELECT 
@@ -423,60 +423,60 @@ namespace GeneralAffairsManagementProject.Pages
         }
 
         /// <summary>
-        /// 検索条件を構築
+        /// ���������\�z
         /// </summary>
         private (string whereClause, Func<List<SqlParameter>> parameterFactory) BuildSearchCondition()
         {
             var whereClauses = new List<string> { "o.DELETE_FLAG = 0" };
 
-            // パラメータを生成する関数を返す(呼び出すたびに新しいインスタンスを生成)
+            // �p�����[�^�𐶐�����֐���Ԃ�(�Ăяo�����тɐV�����C���X�^���X�𐶐�)
             Func<List<SqlParameter>> createParameters = () =>
             {
                 var parameters = new List<SqlParameter>();
 
-                // 発注方法(消耗品マスタ経由で判定)
+                // �������@(���Օi�}�X�^�o�R�Ŕ���)
                 if (SearchCondition.OrderingMethodId.HasValue)
                 {
                     parameters.Add(new SqlParameter("@MethodId", SearchCondition.OrderingMethodId.Value));
                 }
 
-                // 発注者(前方一致)
+                // ������(�O����v)
                 if (!string.IsNullOrWhiteSpace(SearchCondition.OrderUser))
                 {
                     parameters.Add(new SqlParameter("@OrderUser", SearchCondition.OrderUser + "%"));
                 }
 
-                // 品目番号(前方一致)
+                // �i�ڔԍ�(�O����v)
                 if (!string.IsNullOrWhiteSpace(SearchCondition.ItemNumber))
                 {
                     parameters.Add(new SqlParameter("@ItemNumber", SearchCondition.ItemNumber + "%"));
                 }
 
-                // ステータス
+                // �X�e�[�^�X
                 if (SearchCondition.StatusId.HasValue)
                 {
                     parameters.Add(new SqlParameter("@StatusId", SearchCondition.StatusId.Value));
                 }
 
-                // 発注日From
+                // ������From
                 if (SearchCondition.OrderDateFrom.HasValue)
                 {
                     parameters.Add(new SqlParameter("@OrderDateFrom", SearchCondition.OrderDateFrom.Value.Date));
                 }
 
-                // 発注日To
+                // ������To
                 if (SearchCondition.OrderDateTo.HasValue)
                 {
                     parameters.Add(new SqlParameter("@OrderDateTo", SearchCondition.OrderDateTo.Value.Date.AddDays(1)));
                 }
 
-                // 納品日From
+                // �[�i��From
                 if (SearchCondition.DeliveryDateFrom.HasValue)
                 {
                     parameters.Add(new SqlParameter("@DeliveryDateFrom", SearchCondition.DeliveryDateFrom.Value.Date));
                 }
 
-                // 納品日To
+                // �[�i��To
                 if (SearchCondition.DeliveryDateTo.HasValue)
                 {
                     parameters.Add(new SqlParameter("@DeliveryDateTo", SearchCondition.DeliveryDateTo.Value.Date.AddDays(1)));
@@ -485,7 +485,7 @@ namespace GeneralAffairsManagementProject.Pages
                 return parameters;
             };
 
-            // 発注方法(消耗品マスタ経由で判定)
+            // �������@(���Օi�}�X�^�o�R�Ŕ���)
             if (SearchCondition.OrderingMethodId.HasValue)
             {
                 whereClauses.Add(@"EXISTS (
@@ -499,13 +499,13 @@ namespace GeneralAffairsManagementProject.Pages
                 )");
             }
 
-            // 発注者(前方一致)
+            // ������(�O����v)
             if (!string.IsNullOrWhiteSpace(SearchCondition.OrderUser))
             {
                 whereClauses.Add("o.ORDER_USER_NAME LIKE @OrderUser");
             }
 
-            // 品目番号(前方一致)
+            // �i�ڔԍ�(�O����v)
             if (!string.IsNullOrWhiteSpace(SearchCondition.ItemNumber))
             {
                 whereClauses.Add(@"EXISTS (
@@ -518,25 +518,25 @@ namespace GeneralAffairsManagementProject.Pages
                 )");
             }
 
-            // ステータス
+            // �X�e�[�^�X
             if (SearchCondition.StatusId.HasValue)
             {
                 whereClauses.Add("o.ORDER_STATUS_ID = @StatusId");
             }
 
-            // 発注日From
+            // ������From
             if (SearchCondition.OrderDateFrom.HasValue)
             {
                 whereClauses.Add("o.ORDER_DATE >= @OrderDateFrom");
             }
 
-            // 発注日To
+            // ������To
             if (SearchCondition.OrderDateTo.HasValue)
             {
                 whereClauses.Add("o.ORDER_DATE < @OrderDateTo");
             }
 
-            // 納品日From
+            // �[�i��From
             if (SearchCondition.DeliveryDateFrom.HasValue)
             {
                 whereClauses.Add(@"EXISTS (
@@ -548,7 +548,7 @@ namespace GeneralAffairsManagementProject.Pages
                 )");
             }
 
-            // 納品日To
+            // �[�i��To
             if (SearchCondition.DeliveryDateTo.HasValue)
             {
                 whereClauses.Add(@"EXISTS (
@@ -560,7 +560,7 @@ namespace GeneralAffairsManagementProject.Pages
                 )");
             }
 
-            // 有効期限切れ且つ未納品を含まない場合の除外条件
+            // �L�������؂ꊎ���[�i��܂܂Ȃ��ꍇ�̏��O���
             if (!SearchCondition.IncludeExpiredNotDelivered)
             {
                 whereClauses.Add(@"NOT EXISTS (
@@ -579,7 +579,7 @@ namespace GeneralAffairsManagementProject.Pages
         }
 
         /// <summary>
-        /// 検索条件をTempDataに保存
+        /// ���������TempData�ɕۑ�
         /// </summary>
         private void SaveSearchConditionToTempData()
         {
@@ -587,7 +587,7 @@ namespace GeneralAffairsManagementProject.Pages
         }
 
         /// <summary>
-        /// TempDataから検索条件を復元
+        /// TempData���猟������𕜌�
         /// </summary>
         private void RestoreSearchConditionFromTempData()
         {
@@ -597,14 +597,14 @@ namespace GeneralAffairsManagementProject.Pages
                 if (!string.IsNullOrEmpty(searchConditionJson))
                 {
                     SearchCondition = JsonSerializer.Deserialize<OrderSearchCondition>(searchConditionJson) ?? new();
-                    // TempDataを再保存(次回も使えるように)
+                    // TempData��ĕۑ�(�����g����悤��)
                     TempData["SearchCondition"] = searchConditionJson;
                 }
             }
         }
 
         /// <summary>
-        /// 検索結果をTempDataに保存
+        /// �������ʂ�TempData�ɕۑ�
         /// </summary>
         private void SaveSearchResultsToTempData()
         {
@@ -613,7 +613,7 @@ namespace GeneralAffairsManagementProject.Pages
         }
 
         /// <summary>
-        /// TempDataから検索結果を復元
+        /// TempData���猟�����ʂ𕜌�
         /// </summary>
         private void RestoreSearchResultsFromTempData()
         {
@@ -623,7 +623,7 @@ namespace GeneralAffairsManagementProject.Pages
                 if (!string.IsNullOrEmpty(searchResultsJson))
                 {
                     SearchResults = JsonSerializer.Deserialize<List<OrderSearchResult>>(searchResultsJson) ?? new();
-                    // TempDataを再保存(次回も使えるように)
+                    // TempData��ĕۑ�(�����g����悤��)
                     TempData["SearchResults"] = searchResultsJson;
                 }
             }
@@ -634,7 +634,7 @@ namespace GeneralAffairsManagementProject.Pages
                 if (!string.IsNullOrEmpty(pagingInfoJson))
                 {
                     PagingInfo = JsonSerializer.Deserialize<PagingInfo>(pagingInfoJson) ?? new();
-                    // TempDataを再保存(次回も使えるように)
+                    // TempData��ĕۑ�(�����g����悤��)
                     TempData["PagingInfo"] = pagingInfoJson;
                 }
             }
