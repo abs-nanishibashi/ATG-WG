@@ -1,150 +1,150 @@
-using System.ComponentModel.DataAnnotations;
+ï»¿using System.ComponentModel.DataAnnotations;
 
 namespace GeneralAffairsManagementProject.Models
 {
     /// <summary>
-    /// ”­’ŒŸõğŒ
+    /// ç™ºæ³¨æ¤œç´¢æ¡ä»¶
     /// </summary>
     public class OrderSearchCondition
     {
         /// <summary>
-        /// ”­’•û–@ID
+        /// ç™ºæ³¨æ–¹æ³•ID
         /// </summary>
         public int? OrderingMethodId { get; set; }
 
         /// <summary>
-        /// ”­’Òi‘O•ûˆê’vŒŸõj
+        /// ç™ºæ³¨è€…ï¼ˆå‰æ–¹ä¸€è‡´æ¤œç´¢ï¼‰
         /// </summary>
         public string? OrderUser { get; set; }
 
         /// <summary>
-        /// —LŒøŠúŒÀØ‚êŠ‚Â–¢”[•i‚ğŠÜ‚Ş
+        /// æœ‰åŠ¹æœŸé™åˆ‡ã‚Œä¸”ã¤æœªç´å“ã‚’å«ã‚€
         /// </summary>
         public bool IncludeExpiredNotDelivered { get; set; }
 
         /// <summary>
-        /// •i–Ú”Ô†i‘O•ûˆê’vŒŸõj
+        /// å“ç›®ç•ªå·ï¼ˆå‰æ–¹ä¸€è‡´æ¤œç´¢ï¼‰
         /// </summary>
         public string? ItemNumber { get; set; }
 
         /// <summary>
-        /// ƒXƒe[ƒ^ƒXID
+        /// ã‚¹ãƒ†ãƒ¼ã‚¿ã‚¹ID
         /// </summary>
         public int? StatusId { get; set; }
 
         /// <summary>
-        /// ”­’“úFrom
+        /// ç™ºæ³¨æ—¥From
         /// </summary>
-        [Display(Name = "”­’“úiFromj")]
+        [Display(Name = "ç™ºæ³¨æ—¥ï¼ˆFromï¼‰")]
         public DateTime? OrderDateFrom { get; set; }
 
         /// <summary>
-        /// ”­’“úTo
+        /// ç™ºæ³¨æ—¥To
         /// </summary>
-        [Display(Name = "”­’“úiToj")]
+        [Display(Name = "ç™ºæ³¨æ—¥ï¼ˆToï¼‰")]
         public DateTime? OrderDateTo { get; set; }
 
         /// <summary>
-        /// ”[•i“úFrom
+        /// ç´å“æ—¥From
         /// </summary>
-        [Display(Name = "”[•i“úiFromj")]
+        [Display(Name = "ç´å“æ—¥ï¼ˆFromï¼‰")]
         public DateTime? DeliveryDateFrom { get; set; }
 
         /// <summary>
-        /// ”[•i“úTo
+        /// ç´å“æ—¥To
         /// </summary>
-        [Display(Name = "”[•i“úiToj")]
+        [Display(Name = "ç´å“æ—¥ï¼ˆToï¼‰")]
         public DateTime? DeliveryDateTo { get; set; }
 
         /// <summary>
-        /// Œ»İ‚Ìƒy[ƒW”Ô†
+        /// ç¾åœ¨ã®ãƒšãƒ¼ã‚¸ç•ªå·
         /// </summary>
         public int CurrentPage { get; set; } = 1;
     }
 
     /// <summary>
-    /// ”­’ŒŸõŒ‹‰Ê
+    /// ç™ºæ³¨æ¤œç´¢çµæœ
     /// </summary>
     public class OrderSearchResult
     {
         /// <summary>
-        /// ”­’IDiƒVƒXƒeƒ€IDj
+        /// ç™ºæ³¨IDï¼ˆã‚·ã‚¹ãƒ†ãƒ IDï¼‰
         /// </summary>
         public int OrderId { get; set; }
 
         /// <summary>
-        /// ”­’IDi•\¦—pj
+        /// ç™ºæ³¨IDï¼ˆè¡¨ç¤ºç”¨ï¼‰
         /// </summary>
         public string OrderIdDisplay { get; set; } = string.Empty;
 
         /// <summary>
-        /// ”­’“ú
+        /// ç™ºæ³¨æ—¥
         /// </summary>
         public DateTime OrderDate { get; set; }
 
         /// <summary>
-        /// ”­’Ò
+        /// ç™ºæ³¨è€…
         /// </summary>
         public string OrderUser { get; set; } = string.Empty;
 
         /// <summary>
-        /// ”­’•û–@
+        /// ç™ºæ³¨æ–¹æ³•
         /// </summary>
         public string OrderingMethodName { get; set; } = string.Empty;
 
         /// <summary>
-        /// ”­’•i”ÔiƒJƒ“ƒ}‹æØ‚èj
+        /// ç™ºæ³¨å“ç•ªï¼ˆã‚«ãƒ³ãƒåŒºåˆ‡ã‚Šï¼‰
         /// </summary>
         public string ItemNumbers { get; set; } = string.Empty;
 
         /// <summary>
-        /// ‡Œv‹àŠz
+        /// åˆè¨ˆé‡‘é¡
         /// </summary>
         public int TotalPrice { get; set; }
 
         /// <summary>
-        /// ”­’ƒXƒe[ƒ^ƒX
+        /// ç™ºæ³¨ã‚¹ãƒ†ãƒ¼ã‚¿ã‚¹
         /// </summary>
         public string OrderStatusName { get; set; } = string.Empty;
     }
 
     /// <summary>
-    /// ƒy[ƒWƒ“ƒOî•ñ
+    /// ãƒšãƒ¼ã‚¸ãƒ³ã‚°æƒ…å ±
     /// </summary>
     public class PagingInfo
     {
         /// <summary>
-        /// ‘Œ”
+        /// ç·ä»¶æ•°
         /// </summary>
         public int TotalCount { get; set; }
 
         /// <summary>
-        /// 1ƒy[ƒW‚ ‚½‚è‚Ì•\¦Œ”
+        /// 1ãƒšãƒ¼ã‚¸ã‚ãŸã‚Šã®è¡¨ç¤ºä»¶æ•°
         /// </summary>
         public int PageSize { get; set; } = 5;
 
         /// <summary>
-        /// Œ»İ‚Ìƒy[ƒW”Ô†
+        /// ç¾åœ¨ã®ãƒšãƒ¼ã‚¸ç•ªå·
         /// </summary>
         public int CurrentPage { get; set; } = 1;
 
         /// <summary>
-        /// ‘ƒy[ƒW”
+        /// ç·ãƒšãƒ¼ã‚¸æ•°
         /// </summary>
         public int TotalPages => (int)Math.Ceiling((double)TotalCount / PageSize);
 
         /// <summary>
-        /// ‘O‚Ìƒy[ƒW‚ª‘¶İ‚·‚é‚©
+        /// å‰ã®ãƒšãƒ¼ã‚¸ãŒå­˜åœ¨ã™ã‚‹ã‹
         /// </summary>
         public bool HasPreviousPage => CurrentPage > 1;
 
         /// <summary>
-        /// Ÿ‚Ìƒy[ƒW‚ª‘¶İ‚·‚é‚©
+        /// æ¬¡ã®ãƒšãƒ¼ã‚¸ãŒå­˜åœ¨ã™ã‚‹ã‹
         /// </summary>
         public bool HasNextPage => CurrentPage < TotalPages;
 
         /// <summary>
-        /// •\¦‚·‚éƒy[ƒW”Ô†ƒŠƒXƒgiÅ‘å5ƒy[ƒWj
+        /// è¡¨ç¤ºã™ã‚‹ãƒšãƒ¼ã‚¸ç•ªå·ãƒªã‚¹ãƒˆï¼ˆæœ€å¤§5ãƒšãƒ¼ã‚¸ï¼‰
         /// </summary>
         public List<int> PageNumbers
         {
@@ -154,7 +154,7 @@ namespace GeneralAffairsManagementProject.Models
                 var startPage = Math.Max(1, CurrentPage - 2);
                 var endPage = Math.Min(TotalPages, startPage + 4);
 
-                // 5ƒy[ƒW•\¦‚ğˆÛ‚·‚é‚½‚ßŠJnƒy[ƒW‚ğ’²®
+                // 5ãƒšãƒ¼ã‚¸è¡¨ç¤ºã‚’ç¶­æŒã™ã‚‹ãŸã‚é–‹å§‹ãƒšãƒ¼ã‚¸ã‚’èª¿æ•´
                 if (endPage - startPage < 4)
                 {
                     startPage = Math.Max(1, endPage - 4);
@@ -171,7 +171,7 @@ namespace GeneralAffairsManagementProject.Models
     }
 
     /// <summary>
-    /// ”­’•û–@ƒ}ƒXƒ^
+    /// ç™ºæ³¨æ–¹æ³•ãƒã‚¹ã‚¿
     /// </summary>
     public class OrderingMethod
     {
@@ -180,7 +180,7 @@ namespace GeneralAffairsManagementProject.Models
     }
 
     /// <summary>
-    /// ”­’ƒXƒe[ƒ^ƒXƒ}ƒXƒ^
+    /// ç™ºæ³¨ã‚¹ãƒ†ãƒ¼ã‚¿ã‚¹ãƒã‚¹ã‚¿
     /// </summary>
     public class OrderStatus
     {
