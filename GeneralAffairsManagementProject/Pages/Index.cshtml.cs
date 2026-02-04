@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+�ｿusing Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Data.SqlClient;
 using System.Data;
@@ -19,38 +19,38 @@ namespace GeneralAffairsManagementProject.Pages
         }
 
         /// <summary>
-        /// 検索条件
+        /// 讀懃ｴ｢譚｡莉ｶ
         /// </summary>
         [BindProperty]
         public OrderSearchCondition SearchCondition { get; set; } = new();
 
         /// <summary>
-        /// 検索結果
+        /// 讀懃ｴ｢邨先棡
         /// </summary>
         public List<OrderSearchResult> SearchResults { get; set; } = new();
 
         /// <summary>
-        /// ページング情報
+        /// 繝壹�繧ｸ繝ｳ繧ｰ諠�ｱ
         /// </summary>
         public PagingInfo PagingInfo { get; set; } = new();
 
         /// <summary>
-        /// 発注方法リスト
+        /// 逋ｺ豕ｨ譁ｹ豕輔Μ繧ｹ繝
         /// </summary>
         public List<OrderingMethod> OrderingMethods { get; set; } = new();
 
         /// <summary>
-        /// ステータスリスト
+        /// 繧ｹ繝��繧ｿ繧ｹ繝ｪ繧ｹ繝
         /// </summary>
         public List<OrderStatus> OrderStatuses { get; set; } = new();
 
         /// <summary>
-        /// バリデーションエラーメッセージ
+        /// 繝舌Μ繝��繧ｷ繝ｧ繝ｳ繧ｨ繝ｩ繝ｼ繝｡繝�そ繝ｼ繧ｸ
         /// </summary>
         public Dictionary<string, string> ValidationErrors { get; set; } = new();
 
         /// <summary>
-        /// 初期表示
+        /// 蛻晄悄陦ｨ遉ｺ
         /// </summary>
         public async Task OnGetAsync()
         {
@@ -58,14 +58,14 @@ namespace GeneralAffairsManagementProject.Pages
             
             try
             {
-                // マスタデータ取得
+                // 繝槭せ繧ｿ繝��繧ｿ蜿門ｾ
                 await LoadMasterDataAsync();
 
-                // 初期条件で検索
+                // 蛻晄悄譚｡莉ｶ縺ｧ讀懃ｴ｢
                 SearchCondition.IncludeExpiredNotDelivered = false;
                 await ExecuteSearchAsync();
                 
-                // 初回検索結果を保存
+                // 蛻晏屓讀懃ｴ｢邨先棡繧剃ｿ晏ｭ
                 SaveSearchConditionToTempData();
                 SaveSearchResultsToTempData();
                 
@@ -79,7 +79,7 @@ namespace GeneralAffairsManagementProject.Pages
         }
 
         /// <summary>
-        /// 検索ボタン押下
+        /// 讀懃ｴ｢繝懊ち繝ｳ謚ｼ荳
         /// </summary>
         public async Task<IActionResult> OnPostSearchAsync()
         {
@@ -87,23 +87,23 @@ namespace GeneralAffairsManagementProject.Pages
             
             try
             {
-                // マスタデータ取得
+                // 繝槭せ繧ｿ繝��繧ｿ蜿門ｾ
                 await LoadMasterDataAsync();
 
-                // 入力チェック
+                // 蜈･蜉帙メ繧ｧ繝�け
                 if (!ValidateSearchCondition())
                 {
                     _logger.LogWarning("Validation error occurred. Errors: {@ValidationErrors}", ValidationErrors);
-                    // バリデーションエラー時は以前の検索結果を復元
+                    // 繝舌Μ繝��繧ｷ繝ｧ繝ｳ繧ｨ繝ｩ繝ｼ譎ゅ�莉･蜑阪�讀懃ｴ｢邨先棡繧貞ｾｩ蜈
                     RestoreSearchResultsFromTempData();
                     return Page();
                 }
 
-                // 1ページ目を表示
+                // 1繝壹�繧ｸ逶ｮ繧定｡ｨ遉ｺ
                 SearchCondition.CurrentPage = 1;
                 await ExecuteSearchAsync();
 
-                // 検索条件と結果をTempDataに保存
+                // 讀懃ｴ｢譚｡莉ｶ縺ｨ邨先棡繧探empData縺ｫ菫晏ｭ
                 SaveSearchConditionToTempData();
                 SaveSearchResultsToTempData();
 
@@ -120,7 +120,7 @@ namespace GeneralAffairsManagementProject.Pages
         }
 
         /// <summary>
-        /// クリアボタン押下
+        /// 繧ｯ繝ｪ繧｢繝懊ち繝ｳ謚ｼ荳
         /// </summary>
         public IActionResult OnPostClear()
         {
@@ -128,23 +128,23 @@ namespace GeneralAffairsManagementProject.Pages
             
             try
             {
-                // マスタデータ取得（同期版）
+                // 繝槭せ繧ｿ繝��繧ｿ蜿門ｾ暦ｼ亥酔譛溽沿�
                 LoadMasterData();
 
-                // TempDataから検索結果を復元
+                // TempData縺九ｉ讀懃ｴ｢邨先棡繧貞ｾｩ蜈
                 RestoreSearchResultsFromTempData();
 
-                // 検索条件をクリア（モデルバインディング前の状態に戻す）
+                // 讀懃ｴ｢譚｡莉ｶ繧偵け繝ｪ繧｢�医Δ繝�Ν繝舌う繝ｳ繝�ぅ繝ｳ繧ｰ蜑阪�迥ｶ諷九↓謌ｻ縺呻ｼ
                 ModelState.Clear();
                 SearchCondition = new OrderSearchCondition
                 {
                     IncludeExpiredNotDelivered = false
                 };
 
-                // 検索結果はTempDataに再保存（次回のために保持）
+                // 讀懃ｴ｢邨先棡縺ｯTempData縺ｫ蜀堺ｿ晏ｭ假ｼ域ｬ｡蝗槭�縺溘ａ縺ｫ菫晄戟�
                 SaveSearchResultsToTempData();
                 
-                // 検索条件はクリアしたのでTempDataから削除
+                // 讀懃ｴ｢譚｡莉ｶ縺ｯ繧ｯ繝ｪ繧｢縺励◆縺ｮ縺ｧTempData縺九ｉ蜑企勁
                 TempData.Remove("SearchCondition");
 
                 _logger.LogInformation("Clear search condition completed.");
@@ -159,7 +159,7 @@ namespace GeneralAffairsManagementProject.Pages
         }
 
         /// <summary>
-        /// ページング押下
+        /// 繝壹�繧ｸ繝ｳ繧ｰ謚ｼ荳
         /// </summary>
         public async Task<IActionResult> OnPostPageAsync(int page)
         {
@@ -167,17 +167,17 @@ namespace GeneralAffairsManagementProject.Pages
             
             try
             {
-                // マスタデータ取得
+                // 繝槭せ繧ｿ繝��繧ｿ蜿門ｾ
                 await LoadMasterDataAsync();
 
-                // TempDataから検索条件を復元
+                // TempData縺九ｉ讀懃ｴ｢譚｡莉ｶ繧貞ｾｩ蜈
                 RestoreSearchConditionFromTempData();
 
-                // 指定ページで検索
+                // 謖�ｮ壹�繝ｼ繧ｸ縺ｧ讀懃ｴ｢
                 SearchCondition.CurrentPage = page;
                 await ExecuteSearchAsync();
 
-                // 検索条件と結果を再保存
+                // 讀懃ｴ｢譚｡莉ｶ縺ｨ邨先棡繧貞�菫晏ｭ
                 SaveSearchConditionToTempData();
                 SaveSearchResultsToTempData();
 
@@ -194,7 +194,7 @@ namespace GeneralAffairsManagementProject.Pages
         }
 
         /// <summary>
-        /// マスタデータ取得（同期版）
+        /// 繝槭せ繧ｿ繝��繧ｿ蜿門ｾ暦ｼ亥酔譛溽沿�
         /// </summary>
         private void LoadMasterData()
         {
@@ -203,7 +203,7 @@ namespace GeneralAffairsManagementProject.Pages
                 if (conn.State != ConnectionState.Open)
                     conn.Open();
 
-                // 発注方法マスタ取得
+                // 逋ｺ豕ｨ譁ｹ豕輔�繧ｹ繧ｿ蜿門ｾ
                 const string methodSql = @"
                     SELECT ID, NAME
                     FROM TM_ORDERING_METHOD
@@ -224,7 +224,7 @@ namespace GeneralAffairsManagementProject.Pages
                     }
                 }
 
-                // 発注ステータスマスタ取得
+                // 逋ｺ豕ｨ繧ｹ繝��繧ｿ繧ｹ繝槭せ繧ｿ蜿門ｾ
                 const string statusSql = @"
                     SELECT ID, ORDER_STATUS_NAME
                     FROM TM_ORDER_STATUS
@@ -248,7 +248,7 @@ namespace GeneralAffairsManagementProject.Pages
         }
 
         /// <summary>
-        /// マスタデータ取得
+        /// 繝槭せ繧ｿ繝��繧ｿ蜿門ｾ
         /// </summary>
         private async Task LoadMasterDataAsync()
         {
@@ -257,7 +257,7 @@ namespace GeneralAffairsManagementProject.Pages
                 if (conn.State != ConnectionState.Open)
                     await conn.OpenAsync();
 
-                // 発注方法マスタ取得
+                // 逋ｺ豕ｨ譁ｹ豕輔�繧ｹ繧ｿ蜿門ｾ
                 const string methodSql = @"
                     SELECT ID, NAME
                     FROM TM_ORDERING_METHOD
@@ -278,7 +278,7 @@ namespace GeneralAffairsManagementProject.Pages
                     }
                 }
 
-                // 発注ステータスマスタ取得
+                // 逋ｺ豕ｨ繧ｹ繝��繧ｿ繧ｹ繝槭せ繧ｿ蜿門ｾ
                 const string statusSql = @"
                     SELECT ID, ORDER_STATUS_NAME
                     FROM TM_ORDER_STATUS
@@ -302,29 +302,29 @@ namespace GeneralAffairsManagementProject.Pages
         }
 
         /// <summary>
-        /// 入力チェック
+        /// 蜈･蜉帙メ繧ｧ繝�け
         /// </summary>
         private bool ValidateSearchCondition()
         {
             ValidationErrors.Clear();
             bool isValid = true;
 
-            // 発注日チェック
+            // 逋ｺ豕ｨ譌･繝√ぉ繝�け
             if (SearchCondition.OrderDateFrom.HasValue && SearchCondition.OrderDateTo.HasValue)
             {
                 if (SearchCondition.OrderDateFrom.Value > SearchCondition.OrderDateTo.Value)
                 {
-                    ValidationErrors["OrderDate"] = "発注日(From)は発注日(To)以前の日付を指定してください。";
+                    ValidationErrors["OrderDate"] = "逋ｺ豕ｨ譌･(From)縺ｯ逋ｺ豕ｨ譌･(To)莉･蜑阪�譌･莉倥ｒ謖�ｮ壹＠縺ｦ縺上□縺輔＞縲";
                     isValid = false;
                 }
             }
 
-            // 納品日チェック
+            // 邏榊刀譌･繝√ぉ繝�け
             if (SearchCondition.DeliveryDateFrom.HasValue && SearchCondition.DeliveryDateTo.HasValue)
             {
                 if (SearchCondition.DeliveryDateFrom.Value > SearchCondition.DeliveryDateTo.Value)
                 {
-                    ValidationErrors["DeliveryDate"] = "納品日(From)は納品日(To)以前の日付を指定してください。";
+                    ValidationErrors["DeliveryDate"] = "邏榊刀譌･(From)縺ｯ邏榊刀譌･(To)莉･蜑阪�譌･莉倥ｒ謖�ｮ壹＠縺ｦ縺上□縺輔＞縲";
                     isValid = false;
                 }
             }
@@ -333,7 +333,7 @@ namespace GeneralAffairsManagementProject.Pages
         }
 
         /// <summary>
-        /// 検索実行
+        /// 讀懃ｴ｢螳溯｡
         /// </summary>
         private async Task ExecuteSearchAsync()
         {
@@ -342,10 +342,10 @@ namespace GeneralAffairsManagementProject.Pages
                 if (conn.State != ConnectionState.Open)
                     await conn.OpenAsync();
 
-                // 検索条件構築(WHERE句とパラメータを生成)
+                // 讀懃ｴ｢譚｡莉ｶ讒狗ｯ(WHERE蜿･縺ｨ繝代Λ繝｡繝ｼ繧ｿ繧堤函謌)
                 var (whereClause, parameterFactory) = BuildSearchCondition();
 
-                // 総件数取得
+                // 邱丈ｻｶ謨ｰ蜿門ｾ
                 var countSql = $@"
                     SELECT COUNT(*)
                     FROM TD_ORDER o
@@ -359,7 +359,7 @@ namespace GeneralAffairsManagementProject.Pages
                     PagingInfo.CurrentPage = SearchCondition.CurrentPage;
                 }
 
-                // データ取得(ページング)
+                // 繝��繧ｿ蜿門ｾ(繝壹�繧ｸ繝ｳ繧ｰ)
                 var offset = (SearchCondition.CurrentPage - 1) * PagingInfo.PageSize;
                 var dataSql = $@"
                     SELECT 
@@ -423,60 +423,60 @@ namespace GeneralAffairsManagementProject.Pages
         }
 
         /// <summary>
-        /// 検索条件を構築
+        /// 讀懃ｴ｢譚｡莉ｶ繧呈ｧ狗ｯ
         /// </summary>
         private (string whereClause, Func<List<SqlParameter>> parameterFactory) BuildSearchCondition()
         {
             var whereClauses = new List<string> { "o.DELETE_FLAG = 0" };
 
-            // パラメータを生成する関数を返す(呼び出すたびに新しいインスタンスを生成)
+            // 繝代Λ繝｡繝ｼ繧ｿ繧堤函謌舌☆繧矩未謨ｰ繧定ｿ斐☆(蜻ｼ縺ｳ蜃ｺ縺吶◆縺ｳ縺ｫ譁ｰ縺励＞繧､繝ｳ繧ｹ繧ｿ繝ｳ繧ｹ繧堤函謌)
             Func<List<SqlParameter>> createParameters = () =>
             {
                 var parameters = new List<SqlParameter>();
 
-                // 発注方法(消耗品マスタ経由で判定)
+                // 逋ｺ豕ｨ譁ｹ豕(豸郁怜刀繝槭せ繧ｿ邨檎罰縺ｧ蛻､螳)
                 if (SearchCondition.OrderingMethodId.HasValue)
                 {
                     parameters.Add(new SqlParameter("@MethodId", SearchCondition.OrderingMethodId.Value));
                 }
 
-                // 発注者(前方一致)
+                // 逋ｺ豕ｨ閠(蜑肴婿荳閾ｴ)
                 if (!string.IsNullOrWhiteSpace(SearchCondition.OrderUser))
                 {
                     parameters.Add(new SqlParameter("@OrderUser", SearchCondition.OrderUser + "%"));
                 }
 
-                // 品目番号(前方一致)
+                // 蜩∫岼逡ｪ蜿ｷ(蜑肴婿荳閾ｴ)
                 if (!string.IsNullOrWhiteSpace(SearchCondition.ItemNumber))
                 {
                     parameters.Add(new SqlParameter("@ItemNumber", SearchCondition.ItemNumber + "%"));
                 }
 
-                // ステータス
+                // 繧ｹ繝��繧ｿ繧ｹ
                 if (SearchCondition.StatusId.HasValue)
                 {
                     parameters.Add(new SqlParameter("@StatusId", SearchCondition.StatusId.Value));
                 }
 
-                // 発注日From
+                // 逋ｺ豕ｨ譌･From
                 if (SearchCondition.OrderDateFrom.HasValue)
                 {
                     parameters.Add(new SqlParameter("@OrderDateFrom", SearchCondition.OrderDateFrom.Value.Date));
                 }
 
-                // 発注日To
+                // 逋ｺ豕ｨ譌･To
                 if (SearchCondition.OrderDateTo.HasValue)
                 {
                     parameters.Add(new SqlParameter("@OrderDateTo", SearchCondition.OrderDateTo.Value.Date.AddDays(1)));
                 }
 
-                // 納品日From
+                // 邏榊刀譌･From
                 if (SearchCondition.DeliveryDateFrom.HasValue)
                 {
                     parameters.Add(new SqlParameter("@DeliveryDateFrom", SearchCondition.DeliveryDateFrom.Value.Date));
                 }
 
-                // 納品日To
+                // 邏榊刀譌･To
                 if (SearchCondition.DeliveryDateTo.HasValue)
                 {
                     parameters.Add(new SqlParameter("@DeliveryDateTo", SearchCondition.DeliveryDateTo.Value.Date.AddDays(1)));
@@ -485,7 +485,7 @@ namespace GeneralAffairsManagementProject.Pages
                 return parameters;
             };
 
-            // 発注方法(消耗品マスタ経由で判定)
+            // 逋ｺ豕ｨ譁ｹ豕(豸郁怜刀繝槭せ繧ｿ邨檎罰縺ｧ蛻､螳)
             if (SearchCondition.OrderingMethodId.HasValue)
             {
                 whereClauses.Add(@"EXISTS (
@@ -499,13 +499,13 @@ namespace GeneralAffairsManagementProject.Pages
                 )");
             }
 
-            // 発注者(前方一致)
+            // 逋ｺ豕ｨ閠(蜑肴婿荳閾ｴ)
             if (!string.IsNullOrWhiteSpace(SearchCondition.OrderUser))
             {
                 whereClauses.Add("o.ORDER_USER_NAME LIKE @OrderUser");
             }
 
-            // 品目番号(前方一致)
+            // 蜩∫岼逡ｪ蜿ｷ(蜑肴婿荳閾ｴ)
             if (!string.IsNullOrWhiteSpace(SearchCondition.ItemNumber))
             {
                 whereClauses.Add(@"EXISTS (
@@ -518,25 +518,25 @@ namespace GeneralAffairsManagementProject.Pages
                 )");
             }
 
-            // ステータス
+            // 繧ｹ繝��繧ｿ繧ｹ
             if (SearchCondition.StatusId.HasValue)
             {
                 whereClauses.Add("o.ORDER_STATUS_ID = @StatusId");
             }
 
-            // 発注日From
+            // 逋ｺ豕ｨ譌･From
             if (SearchCondition.OrderDateFrom.HasValue)
             {
                 whereClauses.Add("o.ORDER_DATE >= @OrderDateFrom");
             }
 
-            // 発注日To
+            // 逋ｺ豕ｨ譌･To
             if (SearchCondition.OrderDateTo.HasValue)
             {
                 whereClauses.Add("o.ORDER_DATE < @OrderDateTo");
             }
 
-            // 納品日From
+            // 邏榊刀譌･From
             if (SearchCondition.DeliveryDateFrom.HasValue)
             {
                 whereClauses.Add(@"EXISTS (
@@ -548,7 +548,7 @@ namespace GeneralAffairsManagementProject.Pages
                 )");
             }
 
-            // 納品日To
+            // 邏榊刀譌･To
             if (SearchCondition.DeliveryDateTo.HasValue)
             {
                 whereClauses.Add(@"EXISTS (
@@ -560,7 +560,7 @@ namespace GeneralAffairsManagementProject.Pages
                 )");
             }
 
-            // 有効期限切れ且つ未納品を含まない場合の除外条件
+            // 譛牙柑譛滄剞蛻�ｌ荳斐▽譛ｪ邏榊刀繧貞性縺ｾ縺ｪ縺�ｴ蜷医�髯､螟匁擅莉ｶ
             if (!SearchCondition.IncludeExpiredNotDelivered)
             {
                 whereClauses.Add(@"NOT EXISTS (
@@ -579,7 +579,7 @@ namespace GeneralAffairsManagementProject.Pages
         }
 
         /// <summary>
-        /// 検索条件をTempDataに保存
+        /// 讀懃ｴ｢譚｡莉ｶ繧探empData縺ｫ菫晏ｭ
         /// </summary>
         private void SaveSearchConditionToTempData()
         {
@@ -587,7 +587,7 @@ namespace GeneralAffairsManagementProject.Pages
         }
 
         /// <summary>
-        /// TempDataから検索条件を復元
+        /// TempData縺九ｉ讀懃ｴ｢譚｡莉ｶ繧貞ｾｩ蜈
         /// </summary>
         private void RestoreSearchConditionFromTempData()
         {
@@ -597,14 +597,14 @@ namespace GeneralAffairsManagementProject.Pages
                 if (!string.IsNullOrEmpty(searchConditionJson))
                 {
                     SearchCondition = JsonSerializer.Deserialize<OrderSearchCondition>(searchConditionJson) ?? new();
-                    // TempDataを再保存(次回も使えるように)
+                    // TempData繧貞�菫晏ｭ(谺｡蝗槭ｂ菴ｿ縺医ｋ繧医≧縺ｫ)
                     TempData["SearchCondition"] = searchConditionJson;
                 }
             }
         }
 
         /// <summary>
-        /// 検索結果をTempDataに保存
+        /// 讀懃ｴ｢邨先棡繧探empData縺ｫ菫晏ｭ
         /// </summary>
         private void SaveSearchResultsToTempData()
         {
@@ -613,7 +613,7 @@ namespace GeneralAffairsManagementProject.Pages
         }
 
         /// <summary>
-        /// TempDataから検索結果を復元
+        /// TempData縺九ｉ讀懃ｴ｢邨先棡繧貞ｾｩ蜈
         /// </summary>
         private void RestoreSearchResultsFromTempData()
         {
@@ -623,7 +623,7 @@ namespace GeneralAffairsManagementProject.Pages
                 if (!string.IsNullOrEmpty(searchResultsJson))
                 {
                     SearchResults = JsonSerializer.Deserialize<List<OrderSearchResult>>(searchResultsJson) ?? new();
-                    // TempDataを再保存(次回も使えるように)
+                    // TempData繧貞�菫晏ｭ(谺｡蝗槭ｂ菴ｿ縺医ｋ繧医≧縺ｫ)
                     TempData["SearchResults"] = searchResultsJson;
                 }
             }
@@ -634,7 +634,7 @@ namespace GeneralAffairsManagementProject.Pages
                 if (!string.IsNullOrEmpty(pagingInfoJson))
                 {
                     PagingInfo = JsonSerializer.Deserialize<PagingInfo>(pagingInfoJson) ?? new();
-                    // TempDataを再保存(次回も使えるように)
+                    // TempData繧貞�菫晏ｭ(谺｡蝗槭ｂ菴ｿ縺医ｋ繧医≧縺ｫ)
                     TempData["PagingInfo"] = pagingInfoJson;
                 }
             }
