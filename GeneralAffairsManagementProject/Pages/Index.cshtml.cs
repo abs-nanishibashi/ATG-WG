@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
+ï¿½ï½¿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Data.SqlClient;
 using System.Data;
@@ -19,38 +19,38 @@ namespace GeneralAffairsManagementProject.Pages
         }
 
         /// <summary>
-        /// ŒŸõğŒ
+        /// è®€æ‡ƒï½´ï½¢è­šï½¡è‰ï½¶
         /// </summary>
         [BindProperty]
         public OrderSearchCondition SearchCondition { get; set; } = new();
 
         /// <summary>
-        /// ŒŸõŒ‹‰Ê
+        /// è®€æ‡ƒï½´ï½¢é‚¨å…ˆæ£¡
         /// </summary>
         public List<OrderSearchResult> SearchResults { get; set; } = new();
 
         /// <summary>
-        /// ƒy[ƒWƒ“ƒOî•ñ
+        /// ç¹å£¹ï¿½ç¹§ï½¸ç¹ï½³ç¹§ï½°è« ï¿½ï½±
         /// </summary>
         public PagingInfo PagingInfo { get; set; } = new();
 
         /// <summary>
-        /// ”­’•û–@ƒŠƒXƒg
+        /// é€‹ï½ºè±•ï½¨è­ï½¹è±•è¼”Îœç¹§ï½¹ç¹
         /// </summary>
         public List<OrderingMethod> OrderingMethods { get; set; } = new();
 
         /// <summary>
-        /// ƒXƒe[ƒ^ƒXƒŠƒXƒg
+        /// ç¹§ï½¹ç¹ï¿½ï¿½ç¹§ï½¿ç¹§ï½¹ç¹ï½ªç¹§ï½¹ç¹
         /// </summary>
         public List<OrderStatus> OrderStatuses { get; set; } = new();
 
         /// <summary>
-        /// ƒoƒŠƒf[ƒVƒ‡ƒ“ƒGƒ‰[ƒƒbƒZ[ƒW
+        /// ç¹èˆŒÎœç¹ï¿½ï¿½ç¹§ï½·ç¹ï½§ç¹ï½³ç¹§ï½¨ç¹ï½©ç¹ï½¼ç¹ï½¡ç¹ï¿½ãç¹ï½¼ç¹§ï½¸
         /// </summary>
         public Dictionary<string, string> ValidationErrors { get; set; } = new();
 
         /// <summary>
-        /// ‰Šú•\¦
+        /// è›»æ™„æ‚„é™¦ï½¨é‰ï½º
         /// </summary>
         public async Task OnGetAsync()
         {
@@ -58,14 +58,14 @@ namespace GeneralAffairsManagementProject.Pages
             
             try
             {
-                // ƒ}ƒXƒ^ƒf[ƒ^æ“¾
+                // ç¹æ§­ã›ç¹§ï½¿ç¹ï¿½ï¿½ç¹§ï½¿èœ¿é–€ï½¾
                 await LoadMasterDataAsync();
 
-                // ‰ŠúğŒ‚ÅŒŸõ
+                // è›»æ™„æ‚„è­šï½¡è‰ï½¶ç¸ºï½§è®€æ‡ƒï½´ï½¢
                 SearchCondition.IncludeExpiredNotDelivered = false;
                 await ExecuteSearchAsync();
                 
-                // ‰‰ñŒŸõŒ‹‰Ê‚ğ•Û‘¶
+                // è›»æ™å±“è®€æ‡ƒï½´ï½¢é‚¨å…ˆæ£¡ç¹§å‰ƒï½¿æ™ï½­
                 SaveSearchConditionToTempData();
                 SaveSearchResultsToTempData();
                 
@@ -79,7 +79,7 @@ namespace GeneralAffairsManagementProject.Pages
         }
 
         /// <summary>
-        /// ŒŸõƒ{ƒ^ƒ“‰Ÿ‰º
+        /// è®€æ‡ƒï½´ï½¢ç¹æ‡Šã¡ç¹ï½³è¬šï½¼è³
         /// </summary>
         public async Task<IActionResult> OnPostSearchAsync()
         {
@@ -87,23 +87,23 @@ namespace GeneralAffairsManagementProject.Pages
             
             try
             {
-                // ƒ}ƒXƒ^ƒf[ƒ^æ“¾
+                // ç¹æ§­ã›ç¹§ï½¿ç¹ï¿½ï¿½ç¹§ï½¿èœ¿é–€ï½¾
                 await LoadMasterDataAsync();
 
-                // “ü—Íƒ`ƒFƒbƒN
+                // èœˆï½¥èœ‰å¸™ãƒ¡ç¹§ï½§ç¹ï¿½ã‘
                 if (!ValidateSearchCondition())
                 {
                     _logger.LogWarning("Validation error occurred. Errors: {@ValidationErrors}", ValidationErrors);
-                    // ƒoƒŠƒf[ƒVƒ‡ƒ“ƒGƒ‰[‚ÍˆÈ‘O‚ÌŒŸõŒ‹‰Ê‚ğ•œŒ³
+                    // ç¹èˆŒÎœç¹ï¿½ï¿½ç¹§ï½·ç¹ï½§ç¹ï½³ç¹§ï½¨ç¹ï½©ç¹ï½¼è­ã‚…ï¿½è‰ï½¥èœ‘é˜ªï¿½è®€æ‡ƒï½´ï½¢é‚¨å…ˆæ£¡ç¹§è²ï½¾ï½©èœˆ
                     RestoreSearchResultsFromTempData();
                     return Page();
                 }
 
-                // 1ƒy[ƒW–Ú‚ğ•\¦
+                // 1ç¹å£¹ï¿½ç¹§ï½¸é€¶ï½®ç¹§å®šï½¡ï½¨é‰ï½º
                 SearchCondition.CurrentPage = 1;
                 await ExecuteSearchAsync();
 
-                // ŒŸõğŒ‚ÆŒ‹‰Ê‚ğTempData‚É•Û‘¶
+                // è®€æ‡ƒï½´ï½¢è­šï½¡è‰ï½¶ç¸ºï½¨é‚¨å…ˆæ£¡ç¹§æ¢empDataç¸ºï½«è«æ™ï½­
                 SaveSearchConditionToTempData();
                 SaveSearchResultsToTempData();
 
@@ -120,7 +120,7 @@ namespace GeneralAffairsManagementProject.Pages
         }
 
         /// <summary>
-        /// ƒNƒŠƒAƒ{ƒ^ƒ“‰Ÿ‰º
+        /// ç¹§ï½¯ç¹ï½ªç¹§ï½¢ç¹æ‡Šã¡ç¹ï½³è¬šï½¼è³
         /// </summary>
         public IActionResult OnPostClear()
         {
@@ -128,23 +128,23 @@ namespace GeneralAffairsManagementProject.Pages
             
             try
             {
-                // ƒ}ƒXƒ^ƒf[ƒ^æ“¾i“¯Šú”Åj
+                // ç¹æ§­ã›ç¹§ï½¿ç¹ï¿½ï¿½ç¹§ï½¿èœ¿é–€ï½¾æš¦ï½¼äº¥é…”è­›æº½æ²¿ï¿½
                 LoadMasterData();
 
-                // TempData‚©‚çŒŸõŒ‹‰Ê‚ğ•œŒ³
+                // TempDataç¸ºä¹ï½‰è®€æ‡ƒï½´ï½¢é‚¨å…ˆæ£¡ç¹§è²ï½¾ï½©èœˆ
                 RestoreSearchResultsFromTempData();
 
-                // ŒŸõğŒ‚ğƒNƒŠƒAiƒ‚ƒfƒ‹ƒoƒCƒ“ƒfƒBƒ“ƒO‘O‚Ìó‘Ô‚É–ß‚·j
+                // è®€æ‡ƒï½´ï½¢è­šï½¡è‰ï½¶ç¹§åµã‘ç¹ï½ªç¹§ï½¢ï¿½åŒ»Î”ç¹ï¿½Îç¹èˆŒã†ç¹ï½³ç¹ï¿½ã…ç¹ï½³ç¹§ï½°èœ‘é˜ªï¿½è¿¥ï½¶è«·ä¹â†“è¬Œï½»ç¸ºå‘»ï½¼
                 ModelState.Clear();
                 SearchCondition = new OrderSearchCondition
                 {
                     IncludeExpiredNotDelivered = false
                 };
 
-                // ŒŸõŒ‹‰Ê‚ÍTempData‚ÉÄ•Û‘¶iŸ‰ñ‚Ì‚½‚ß‚É•Ûj
+                // è®€æ‡ƒï½´ï½¢é‚¨å…ˆæ£¡ç¸ºï½¯TempDataç¸ºï½«èœ€å ºï½¿æ™ï½­å‡ï½¼åŸŸï½¬ï½¡è—æ§­ï¿½ç¸ºæº˜ï½ç¸ºï½«è«æ™„æˆŸï¿½
                 SaveSearchResultsToTempData();
                 
-                // ŒŸõğŒ‚ÍƒNƒŠƒA‚µ‚½‚Ì‚ÅTempData‚©‚çíœ
+                // è®€æ‡ƒï½´ï½¢è­šï½¡è‰ï½¶ç¸ºï½¯ç¹§ï½¯ç¹ï½ªç¹§ï½¢ç¸ºåŠ±â—†ç¸ºï½®ç¸ºï½§TempDataç¸ºä¹ï½‰èœ‘ä¼å‹
                 TempData.Remove("SearchCondition");
 
                 _logger.LogInformation("Clear search condition completed.");
@@ -159,7 +159,7 @@ namespace GeneralAffairsManagementProject.Pages
         }
 
         /// <summary>
-        /// ƒy[ƒWƒ“ƒO‰Ÿ‰º
+        /// ç¹å£¹ï¿½ç¹§ï½¸ç¹ï½³ç¹§ï½°è¬šï½¼è³
         /// </summary>
         public async Task<IActionResult> OnPostPageAsync(int page)
         {
@@ -167,17 +167,17 @@ namespace GeneralAffairsManagementProject.Pages
             
             try
             {
-                // ƒ}ƒXƒ^ƒf[ƒ^æ“¾
+                // ç¹æ§­ã›ç¹§ï½¿ç¹ï¿½ï¿½ç¹§ï½¿èœ¿é–€ï½¾
                 await LoadMasterDataAsync();
 
-                // TempData‚©‚çŒŸõğŒ‚ğ•œŒ³
+                // TempDataç¸ºä¹ï½‰è®€æ‡ƒï½´ï½¢è­šï½¡è‰ï½¶ç¹§è²ï½¾ï½©èœˆ
                 RestoreSearchConditionFromTempData();
 
-                // w’èƒy[ƒW‚ÅŒŸõ
+                // è¬–ï¿½ï½®å£¹ï¿½ç¹ï½¼ç¹§ï½¸ç¸ºï½§è®€æ‡ƒï½´ï½¢
                 SearchCondition.CurrentPage = page;
                 await ExecuteSearchAsync();
 
-                // ŒŸõğŒ‚ÆŒ‹‰Ê‚ğÄ•Û‘¶
+                // è®€æ‡ƒï½´ï½¢è­šï½¡è‰ï½¶ç¸ºï½¨é‚¨å…ˆæ£¡ç¹§è²ï¿½è«æ™ï½­
                 SaveSearchConditionToTempData();
                 SaveSearchResultsToTempData();
 
@@ -194,7 +194,7 @@ namespace GeneralAffairsManagementProject.Pages
         }
 
         /// <summary>
-        /// ƒ}ƒXƒ^ƒf[ƒ^æ“¾i“¯Šú”Åj
+        /// ç¹æ§­ã›ç¹§ï½¿ç¹ï¿½ï¿½ç¹§ï½¿èœ¿é–€ï½¾æš¦ï½¼äº¥é…”è­›æº½æ²¿ï¿½
         /// </summary>
         private void LoadMasterData()
         {
@@ -203,7 +203,7 @@ namespace GeneralAffairsManagementProject.Pages
                 if (conn.State != ConnectionState.Open)
                     conn.Open();
 
-                // ”­’•û–@ƒ}ƒXƒ^æ“¾
+                // é€‹ï½ºè±•ï½¨è­ï½¹è±•è¼”ï¿½ç¹§ï½¹ç¹§ï½¿èœ¿é–€ï½¾
                 const string methodSql = @"
                     SELECT ID, NAME
                     FROM TM_ORDERING_METHOD
@@ -224,7 +224,7 @@ namespace GeneralAffairsManagementProject.Pages
                     }
                 }
 
-                // ”­’ƒXƒe[ƒ^ƒXƒ}ƒXƒ^æ“¾
+                // é€‹ï½ºè±•ï½¨ç¹§ï½¹ç¹ï¿½ï¿½ç¹§ï½¿ç¹§ï½¹ç¹æ§­ã›ç¹§ï½¿èœ¿é–€ï½¾
                 const string statusSql = @"
                     SELECT ID, ORDER_STATUS_NAME
                     FROM TM_ORDER_STATUS
@@ -248,7 +248,7 @@ namespace GeneralAffairsManagementProject.Pages
         }
 
         /// <summary>
-        /// ƒ}ƒXƒ^ƒf[ƒ^æ“¾
+        /// ç¹æ§­ã›ç¹§ï½¿ç¹ï¿½ï¿½ç¹§ï½¿èœ¿é–€ï½¾
         /// </summary>
         private async Task LoadMasterDataAsync()
         {
@@ -257,7 +257,7 @@ namespace GeneralAffairsManagementProject.Pages
                 if (conn.State != ConnectionState.Open)
                     await conn.OpenAsync();
 
-                // ”­’•û–@ƒ}ƒXƒ^æ“¾
+                // é€‹ï½ºè±•ï½¨è­ï½¹è±•è¼”ï¿½ç¹§ï½¹ç¹§ï½¿èœ¿é–€ï½¾
                 const string methodSql = @"
                     SELECT ID, NAME
                     FROM TM_ORDERING_METHOD
@@ -278,7 +278,7 @@ namespace GeneralAffairsManagementProject.Pages
                     }
                 }
 
-                // ”­’ƒXƒe[ƒ^ƒXƒ}ƒXƒ^æ“¾
+                // é€‹ï½ºè±•ï½¨ç¹§ï½¹ç¹ï¿½ï¿½ç¹§ï½¿ç¹§ï½¹ç¹æ§­ã›ç¹§ï½¿èœ¿é–€ï½¾
                 const string statusSql = @"
                     SELECT ID, ORDER_STATUS_NAME
                     FROM TM_ORDER_STATUS
@@ -302,29 +302,29 @@ namespace GeneralAffairsManagementProject.Pages
         }
 
         /// <summary>
-        /// “ü—Íƒ`ƒFƒbƒN
+        /// èœˆï½¥èœ‰å¸™ãƒ¡ç¹§ï½§ç¹ï¿½ã‘
         /// </summary>
         private bool ValidateSearchCondition()
         {
             ValidationErrors.Clear();
             bool isValid = true;
 
-            // ”­’“úƒ`ƒFƒbƒN
+            // é€‹ï½ºè±•ï½¨è­Œï½¥ç¹âˆšã‰ç¹ï¿½ã‘
             if (SearchCondition.OrderDateFrom.HasValue && SearchCondition.OrderDateTo.HasValue)
             {
                 if (SearchCondition.OrderDateFrom.Value > SearchCondition.OrderDateTo.Value)
                 {
-                    ValidationErrors["OrderDate"] = "”­’“ú(From)‚Í”­’“ú(To)ˆÈ‘O‚Ì“ú•t‚ğw’è‚µ‚Ä‚­‚¾‚³‚¢B";
+                    ValidationErrors["OrderDate"] = "é€‹ï½ºè±•ï½¨è­Œï½¥(From)ç¸ºï½¯é€‹ï½ºè±•ï½¨è­Œï½¥(To)è‰ï½¥èœ‘é˜ªï¿½è­Œï½¥è‰å€¥ï½’è¬–ï¿½ï½®å£¹ï¼ ç¸ºï½¦ç¸ºä¸Šâ–¡ç¸ºè¼”ï¼ç¸²";
                     isValid = false;
                 }
             }
 
-            // ”[•i“úƒ`ƒFƒbƒN
+            // é‚æ¦Šåˆ€è­Œï½¥ç¹âˆšã‰ç¹ï¿½ã‘
             if (SearchCondition.DeliveryDateFrom.HasValue && SearchCondition.DeliveryDateTo.HasValue)
             {
                 if (SearchCondition.DeliveryDateFrom.Value > SearchCondition.DeliveryDateTo.Value)
                 {
-                    ValidationErrors["DeliveryDate"] = "”[•i“ú(From)‚Í”[•i“ú(To)ˆÈ‘O‚Ì“ú•t‚ğw’è‚µ‚Ä‚­‚¾‚³‚¢B";
+                    ValidationErrors["DeliveryDate"] = "é‚æ¦Šåˆ€è­Œï½¥(From)ç¸ºï½¯é‚æ¦Šåˆ€è­Œï½¥(To)è‰ï½¥èœ‘é˜ªï¿½è­Œï½¥è‰å€¥ï½’è¬–ï¿½ï½®å£¹ï¼ ç¸ºï½¦ç¸ºä¸Šâ–¡ç¸ºè¼”ï¼ç¸²";
                     isValid = false;
                 }
             }
@@ -333,7 +333,7 @@ namespace GeneralAffairsManagementProject.Pages
         }
 
         /// <summary>
-        /// ŒŸõÀs
+        /// è®€æ‡ƒï½´ï½¢è³æº¯ï½¡
         /// </summary>
         private async Task ExecuteSearchAsync()
         {
@@ -342,10 +342,10 @@ namespace GeneralAffairsManagementProject.Pages
                 if (conn.State != ConnectionState.Open)
                     await conn.OpenAsync();
 
-                // ŒŸõğŒ\’z(WHERE‹å‚Æƒpƒ‰ƒ[ƒ^‚ğ¶¬)
+                // è®€æ‡ƒï½´ï½¢è­šï½¡è‰ï½¶è®’ç‹—ï½¯(WHEREèœ¿ï½¥ç¸ºï½¨ç¹ä»£Î›ç¹ï½¡ç¹ï½¼ç¹§ï½¿ç¹§å ¤å‡½è¬Œ)
                 var (whereClause, parameterFactory) = BuildSearchCondition();
 
-                // ‘Œ”æ“¾
+                // é‚±ä¸ˆï½»ï½¶è¬¨ï½°èœ¿é–€ï½¾
                 var countSql = $@"
                     SELECT COUNT(*)
                     FROM TD_ORDER o
@@ -359,7 +359,7 @@ namespace GeneralAffairsManagementProject.Pages
                     PagingInfo.CurrentPage = SearchCondition.CurrentPage;
                 }
 
-                // ƒf[ƒ^æ“¾(ƒy[ƒWƒ“ƒO)
+                // ç¹ï¿½ï¿½ç¹§ï½¿èœ¿é–€ï½¾(ç¹å£¹ï¿½ç¹§ï½¸ç¹ï½³ç¹§ï½°)
                 var offset = (SearchCondition.CurrentPage - 1) * PagingInfo.PageSize;
                 var dataSql = $@"
                     SELECT 
@@ -423,60 +423,60 @@ namespace GeneralAffairsManagementProject.Pages
         }
 
         /// <summary>
-        /// ŒŸõğŒ‚ğ\’z
+        /// è®€æ‡ƒï½´ï½¢è­šï½¡è‰ï½¶ç¹§å‘ˆï½§ç‹—ï½¯
         /// </summary>
         private (string whereClause, Func<List<SqlParameter>> parameterFactory) BuildSearchCondition()
         {
             var whereClauses = new List<string> { "o.DELETE_FLAG = 0" };
 
-            // ƒpƒ‰ƒ[ƒ^‚ğ¶¬‚·‚éŠÖ”‚ğ•Ô‚·(ŒÄ‚Ño‚·‚½‚Ñ‚ÉV‚µ‚¢ƒCƒ“ƒXƒ^ƒ“ƒX‚ğ¶¬)
+            // ç¹ä»£Î›ç¹ï½¡ç¹ï½¼ç¹§ï½¿ç¹§å ¤å‡½è¬ŒèˆŒâ˜†ç¹§çŸ©æœªè¬¨ï½°ç¹§å®šï½¿æ–â˜†(èœ»ï½¼ç¸ºï½³èœƒï½ºç¸ºå¶â—†ç¸ºï½³ç¸ºï½«è­ï½°ç¸ºåŠ±ï¼ç¹§ï½¤ç¹ï½³ç¹§ï½¹ç¹§ï½¿ç¹ï½³ç¹§ï½¹ç¹§å ¤å‡½è¬Œ)
             Func<List<SqlParameter>> createParameters = () =>
             {
                 var parameters = new List<SqlParameter>();
 
-                // ”­’•û–@(Á–Õ•iƒ}ƒXƒ^Œo—R‚Å”»’è)
+                // é€‹ï½ºè±•ï½¨è­ï½¹è±•(è±¸éƒæ€œåˆ€ç¹æ§­ã›ç¹§ï½¿é‚¨æªç½°ç¸ºï½§è›»ï½¤è³)
                 if (SearchCondition.OrderingMethodId.HasValue)
                 {
                     parameters.Add(new SqlParameter("@MethodId", SearchCondition.OrderingMethodId.Value));
                 }
 
-                // ”­’Ò(‘O•ûˆê’v)
+                // é€‹ï½ºè±•ï½¨é– (èœ‘è‚´å©¿è³é–¾ï½´)
                 if (!string.IsNullOrWhiteSpace(SearchCondition.OrderUser))
                 {
                     parameters.Add(new SqlParameter("@OrderUser", SearchCondition.OrderUser + "%"));
                 }
 
-                // •i–Ú”Ô†(‘O•ûˆê’v)
+                // èœ©âˆ«å²¼é€¡ï½ªèœ¿ï½·(èœ‘è‚´å©¿è³é–¾ï½´)
                 if (!string.IsNullOrWhiteSpace(SearchCondition.ItemNumber))
                 {
                     parameters.Add(new SqlParameter("@ItemNumber", SearchCondition.ItemNumber + "%"));
                 }
 
-                // ƒXƒe[ƒ^ƒX
+                // ç¹§ï½¹ç¹ï¿½ï¿½ç¹§ï½¿ç¹§ï½¹
                 if (SearchCondition.StatusId.HasValue)
                 {
                     parameters.Add(new SqlParameter("@StatusId", SearchCondition.StatusId.Value));
                 }
 
-                // ”­’“úFrom
+                // é€‹ï½ºè±•ï½¨è­Œï½¥From
                 if (SearchCondition.OrderDateFrom.HasValue)
                 {
                     parameters.Add(new SqlParameter("@OrderDateFrom", SearchCondition.OrderDateFrom.Value.Date));
                 }
 
-                // ”­’“úTo
+                // é€‹ï½ºè±•ï½¨è­Œï½¥To
                 if (SearchCondition.OrderDateTo.HasValue)
                 {
                     parameters.Add(new SqlParameter("@OrderDateTo", SearchCondition.OrderDateTo.Value.Date.AddDays(1)));
                 }
 
-                // ”[•i“úFrom
+                // é‚æ¦Šåˆ€è­Œï½¥From
                 if (SearchCondition.DeliveryDateFrom.HasValue)
                 {
                     parameters.Add(new SqlParameter("@DeliveryDateFrom", SearchCondition.DeliveryDateFrom.Value.Date));
                 }
 
-                // ”[•i“úTo
+                // é‚æ¦Šåˆ€è­Œï½¥To
                 if (SearchCondition.DeliveryDateTo.HasValue)
                 {
                     parameters.Add(new SqlParameter("@DeliveryDateTo", SearchCondition.DeliveryDateTo.Value.Date.AddDays(1)));
@@ -485,7 +485,7 @@ namespace GeneralAffairsManagementProject.Pages
                 return parameters;
             };
 
-            // ”­’•û–@(Á–Õ•iƒ}ƒXƒ^Œo—R‚Å”»’è)
+            // é€‹ï½ºè±•ï½¨è­ï½¹è±•(è±¸éƒæ€œåˆ€ç¹æ§­ã›ç¹§ï½¿é‚¨æªç½°ç¸ºï½§è›»ï½¤è³)
             if (SearchCondition.OrderingMethodId.HasValue)
             {
                 whereClauses.Add(@"EXISTS (
@@ -499,13 +499,13 @@ namespace GeneralAffairsManagementProject.Pages
                 )");
             }
 
-            // ”­’Ò(‘O•ûˆê’v)
+            // é€‹ï½ºè±•ï½¨é– (èœ‘è‚´å©¿è³é–¾ï½´)
             if (!string.IsNullOrWhiteSpace(SearchCondition.OrderUser))
             {
                 whereClauses.Add("o.ORDER_USER_NAME LIKE @OrderUser");
             }
 
-            // •i–Ú”Ô†(‘O•ûˆê’v)
+            // èœ©âˆ«å²¼é€¡ï½ªèœ¿ï½·(èœ‘è‚´å©¿è³é–¾ï½´)
             if (!string.IsNullOrWhiteSpace(SearchCondition.ItemNumber))
             {
                 whereClauses.Add(@"EXISTS (
@@ -518,25 +518,25 @@ namespace GeneralAffairsManagementProject.Pages
                 )");
             }
 
-            // ƒXƒe[ƒ^ƒX
+            // ç¹§ï½¹ç¹ï¿½ï¿½ç¹§ï½¿ç¹§ï½¹
             if (SearchCondition.StatusId.HasValue)
             {
                 whereClauses.Add("o.ORDER_STATUS_ID = @StatusId");
             }
 
-            // ”­’“úFrom
+            // é€‹ï½ºè±•ï½¨è­Œï½¥From
             if (SearchCondition.OrderDateFrom.HasValue)
             {
                 whereClauses.Add("o.ORDER_DATE >= @OrderDateFrom");
             }
 
-            // ”­’“úTo
+            // é€‹ï½ºè±•ï½¨è­Œï½¥To
             if (SearchCondition.OrderDateTo.HasValue)
             {
                 whereClauses.Add("o.ORDER_DATE < @OrderDateTo");
             }
 
-            // ”[•i“úFrom
+            // é‚æ¦Šåˆ€è­Œï½¥From
             if (SearchCondition.DeliveryDateFrom.HasValue)
             {
                 whereClauses.Add(@"EXISTS (
@@ -548,7 +548,7 @@ namespace GeneralAffairsManagementProject.Pages
                 )");
             }
 
-            // ”[•i“úTo
+            // é‚æ¦Šåˆ€è­Œï½¥To
             if (SearchCondition.DeliveryDateTo.HasValue)
             {
                 whereClauses.Add(@"EXISTS (
@@ -560,7 +560,7 @@ namespace GeneralAffairsManagementProject.Pages
                 )");
             }
 
-            // —LŒøŠúŒÀØ‚êŠ‚Â–¢”[•i‚ğŠÜ‚Ü‚È‚¢ê‡‚ÌœŠOğŒ
+            // è­›ç‰™æŸ‘è­›æ»„å‰è›»ï¿½ï½Œè³æ–â–½è­›ï½ªé‚æ¦Šåˆ€ç¹§è²æ€§ç¸ºï½¾ç¸ºï½ªç¸ºï¿½ï½´èœ·åŒ»ï¿½é«¯ï½¤èŸåŒæ“…è‰ï½¶
             if (!SearchCondition.IncludeExpiredNotDelivered)
             {
                 whereClauses.Add(@"NOT EXISTS (
@@ -579,7 +579,7 @@ namespace GeneralAffairsManagementProject.Pages
         }
 
         /// <summary>
-        /// ŒŸõğŒ‚ğTempData‚É•Û‘¶
+        /// è®€æ‡ƒï½´ï½¢è­šï½¡è‰ï½¶ç¹§æ¢empDataç¸ºï½«è«æ™ï½­
         /// </summary>
         private void SaveSearchConditionToTempData()
         {
@@ -587,7 +587,7 @@ namespace GeneralAffairsManagementProject.Pages
         }
 
         /// <summary>
-        /// TempData‚©‚çŒŸõğŒ‚ğ•œŒ³
+        /// TempDataç¸ºä¹ï½‰è®€æ‡ƒï½´ï½¢è­šï½¡è‰ï½¶ç¹§è²ï½¾ï½©èœˆ
         /// </summary>
         private void RestoreSearchConditionFromTempData()
         {
@@ -597,14 +597,14 @@ namespace GeneralAffairsManagementProject.Pages
                 if (!string.IsNullOrEmpty(searchConditionJson))
                 {
                     SearchCondition = JsonSerializer.Deserialize<OrderSearchCondition>(searchConditionJson) ?? new();
-                    // TempData‚ğÄ•Û‘¶(Ÿ‰ñ‚àg‚¦‚é‚æ‚¤‚É)
+                    // TempDataç¹§è²ï¿½è«æ™ï½­(è°ºï½¡è—æ§­ï½‚è´ï½¿ç¸ºåŒ»ï½‹ç¹§åŒ»â‰§ç¸ºï½«)
                     TempData["SearchCondition"] = searchConditionJson;
                 }
             }
         }
 
         /// <summary>
-        /// ŒŸõŒ‹‰Ê‚ğTempData‚É•Û‘¶
+        /// è®€æ‡ƒï½´ï½¢é‚¨å…ˆæ£¡ç¹§æ¢empDataç¸ºï½«è«æ™ï½­
         /// </summary>
         private void SaveSearchResultsToTempData()
         {
@@ -613,7 +613,7 @@ namespace GeneralAffairsManagementProject.Pages
         }
 
         /// <summary>
-        /// TempData‚©‚çŒŸõŒ‹‰Ê‚ğ•œŒ³
+        /// TempDataç¸ºä¹ï½‰è®€æ‡ƒï½´ï½¢é‚¨å…ˆæ£¡ç¹§è²ï½¾ï½©èœˆ
         /// </summary>
         private void RestoreSearchResultsFromTempData()
         {
@@ -623,7 +623,7 @@ namespace GeneralAffairsManagementProject.Pages
                 if (!string.IsNullOrEmpty(searchResultsJson))
                 {
                     SearchResults = JsonSerializer.Deserialize<List<OrderSearchResult>>(searchResultsJson) ?? new();
-                    // TempData‚ğÄ•Û‘¶(Ÿ‰ñ‚àg‚¦‚é‚æ‚¤‚É)
+                    // TempDataç¹§è²ï¿½è«æ™ï½­(è°ºï½¡è—æ§­ï½‚è´ï½¿ç¸ºåŒ»ï½‹ç¹§åŒ»â‰§ç¸ºï½«)
                     TempData["SearchResults"] = searchResultsJson;
                 }
             }
@@ -634,7 +634,7 @@ namespace GeneralAffairsManagementProject.Pages
                 if (!string.IsNullOrEmpty(pagingInfoJson))
                 {
                     PagingInfo = JsonSerializer.Deserialize<PagingInfo>(pagingInfoJson) ?? new();
-                    // TempData‚ğÄ•Û‘¶(Ÿ‰ñ‚àg‚¦‚é‚æ‚¤‚É)
+                    // TempDataç¹§è²ï¿½è«æ™ï½­(è°ºï½¡è—æ§­ï½‚è´ï½¿ç¸ºåŒ»ï½‹ç¹§åŒ»â‰§ç¸ºï½«)
                     TempData["PagingInfo"] = pagingInfoJson;
                 }
             }
