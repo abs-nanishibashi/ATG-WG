@@ -8,55 +8,121 @@
 
 <form method="post">
     <div class="form-group">
-        <label for="OrderType">発注方法</label>
-        <select asp-for="OrderType" class="form-control">
+        <label>発注方法</label>
+        <select asp-for="OrderingMethodId"
+                id="orderingMethod"
+                class="form-control">
             <option value="">選択してください</option>
-            <option value="オンライン">オンライン</option>
-            <option value="電話">電話</option>
-            <option value="FAX">FAX</option>
+            @foreach (var m in Model.OrderingMethods)
+            {
+                <option value="@m.Id">@m.Name</option>
+            }
         </select>
+        <span asp-validation-for="OrderingMethodId" class="text-danger"></span>
     </div>
 
     <div class="form-group">
-        <label for="Category">カテゴリ</label>
-        <select asp-for="Category" class="form-control" id="categorySelect">
+        <label>カテゴリ</label>
+        <select asp-for="CategoryId"
+                id="categorySelect"
+                class="form-control"
+                disabled>
             <option value="">選択してください</option>
-            <option value="食品">食品</option>
-            <option value="工具">工具</option>
         </select>
+        <span asp-validation-for="CategoryId" class="text-danger"></span>
     </div>
 
     <div class="form-group">
-        <label for="ItemName">品目名 <span style="color:red">*</span></label>
-        <select asp-for="ItemName" class="form-control" id="itemSelect" required>
+        <label>品目名</label>
+        <select asp-for="ConsumablesId"
+                id="itemSelect"
+                class="form-control"
+                disabled
+                required>
             <option value="">選択してください</option>
         </select>
+        <span asp-validation-for="ConsumablesId" class="text-danger"></span>
     </div>
 
     <div class="form-group">
-        <label for="Quantity">数量 <span style="color:red">*</span></label>
-        <input asp-for="Quantity" type="number" class="form-control" min="1" max="99" required />
+        <label>数量</label>
+        <input asp-for="Quantity"
+               type="number"
+               class="form-control"
+               min="1"
+               max="99"
+               required />
+        <span asp-validation-for="Quantity" class="text-danger"></span>
     </div>
 
     <br />
-    <button type="submit" class="btn btn-primary">追加</button>
-    <a href="/Index" class="btn btn-secondary">キャンセル</a>
+
+    <button type="submit" class="btn btn-primary">
+        追加
+    </button>
+
+    <button type="submit"
+            class="btn btn-secondary"
+            asp-page-handler="Cancel"
+            formnovalidate>
+        キャンセル
+    </button>
 </form>
 
 @section Scripts {
-<script>
-    document.getElementById("categorySelect").addEventListener("change", function () {
-        var category = this.value;
-        var itemSelect = document.getElementById("itemSelect");
-        itemSelect.innerHTML = "";
+    <partial name="_ValidationScriptsPartial" />
 
-        if (category === "食品") {
-            itemSelect.innerHTML += "<option value='米'>米</option>";
-            itemSelect.innerHTML += "<option value='パン'>パン</option>";
-        } else if (category === "工具") {
-            itemSelect.innerHTML += "<option value='ドライバー'>ドライバー</option>";
-            itemSelect.innerHTML += "<option value='ハンマー'>ハンマー</option>";
+    <script>
+        const methodSelect = document.getElementById("orderingMethod");
+        const categorySelect = document.getElementById("categorySelect");
+        const itemSelect = document.getElementById("itemSelect");
+
+        function resetSelect(select) {
+            select.innerHTML = '<option value="">選択してください</option>';
+            select.disabled = true;
         }
-    });
-</script>
+
+        methodSelect.addEventListener("change", async () => {
+            resetSelect(categorySelect);
+            resetSelect(itemSelect);
+
+            if (!methodSelect.value) return;
+
+            const res = await fetch(`?handler=Categories&methodId=${methodSelect.value}`);
+            const list = await res.json();
+
+            list.forEach(x => {
+                const opt = document.createElement("option");
+                opt.value = x.id;
+                opt.textContent = x.name;
+                categorySelect.appendChild(opt);
+            });
+
+            categorySelect.disabled = false;
+        });
+
+        categorySelect.addEventListener("change", async () => {
+            resetSelect(itemSelect);
+
+            if (!categorySelect.value) return;
+
+            const res = await fetch(`?handler=Consumables&categoryId=${categorySelect.value}`);
+            const list = await res.json();
+
+            list.forEach(x => {
+                const opt = document.createElement("option");
+                opt.value = x.id;
+                opt.textContent = x.name;
+                itemSelect.appendChild(opt);
+            });
+
+            itemSelect.disabled = false;
+        });
+
+        // バリデーションエラーで戻った場合の復元
+        window.addEventListener("load", () => {
+            if (methodSelect.value) categorySelect.disabled = false;
+            if (categorySelect.value) itemSelect.disabled = false;
+        });
+    </script>
 }
