@@ -1,0 +1,21 @@
+name: Deploy to Azure Web App
+
+on:
+  push:
+    branches: [ "main" ]  # main に push されたら実行
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # リポジトリのコードを取得
+      - uses: actions/checkout@v4
+
+      # Azure App Service にデプロイ
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: paas-atg-app
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE }}
+          package: .
