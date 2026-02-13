@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Data.SqlClient;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics;
 using GeneralAffairsManagementProject.Utils;
 
 namespace GeneralAffairsManagementProject.Pages
@@ -9,10 +10,12 @@ namespace GeneralAffairsManagementProject.Pages
     public class NewOrderModel : PageModel
     {
         private readonly IConfiguration _configuration;
+        private readonly ILogger<NewOrderModel> _logger;
 
-        public NewOrderModel(IConfiguration configuration)
+        public NewOrderModel(IConfiguration configuration, ILogger<NewOrderModel> logger)
         {
             _configuration = configuration;
+            _logger = logger;
         }
 
         // 画面から受け取るID
@@ -39,55 +42,160 @@ namespace GeneralAffairsManagementProject.Pages
 
         public void OnGet()
         {
-            LoadOrderingMethods();
+            // リクエスト相関用の情報（AIのoperation_Idとは別に、アプリ側で追いたい時用）
+            var correlationId = HttpContext.TraceIdentifier;
+            var userName = User.Identity?.Name ?? "anonymous";
 
-            if (OrderingMethodId.HasValue)
+            using (_logger.BeginScope(new Dictionary<string, object?>
             {
-                Categories = LoadCategories(OrderingMethodId.Value);
-            }
-            if (CategoryId.HasValue)
+                ["Handler"] = "OnGet",
+                ["CorrelationId"] = correlationId,
+                ["UserName"] = userName
+            }))
             {
-                Consumables = LoadConsumables(CategoryId.Value);
+                var sw = Stopwatch.StartNew();
+                _logger.LogInformation("新規発注画面 初期表示開始");
+
+                try
+                {
+                    LoadOrderingMethods();
+                    _logger.LogInformation("発注方法候補ロード完了 count={Count}", OrderingMethods.Count);
+
+                    if (OrderingMethodId.HasValue)
+                    {
+                        Categories = LoadCategories(OrderingMethodId.Value);
+                        _logger.LogInformation("カテゴリ候補ロード完了 methodId={MethodId} count={Count}",
+                            OrderingMethodId.Value, Categories.Count);
+                    }
+
+                    if (CategoryId.HasValue)
+                    {
+                        Consumables = LoadConsumables(CategoryId.Value);
+                        _logger.LogInformation("品目候補ロード完了 categoryId={CategoryId} count={Count}",
+                            CategoryId.Value, Consumables.Count);
+                    }
+
+                    _logger.LogInformation("新規発注画面 初期表示終了 elapsedMs={ElapsedMs}", sw.ElapsedMilliseconds);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "新規発注画面 初期表示中に例外発生 elapsedMs={ElapsedMs}", sw.ElapsedMilliseconds);
+                    throw; // 画面初期表示で落ちるなら例外としても把握できるようにする
+                }
             }
         }
 
         // Ajax: 発注方法IDからカテゴリ一覧を返す
         public JsonResult OnGetCategories(int methodId)
         {
-            var list = LoadCategories(methodId);
-            return new JsonResult(list);
+            var correlationId = HttpContext.TraceIdentifier;
+            var userName = User.Identity?.Name ?? "anonymous";
+
+            using (_logger.BeginScope(new Dictionary<string, object?>
+            {
+                ["Handler"] = "OnGetCategories",
+                ["CorrelationId"] = correlationId,
+                ["UserName"] = userName,
+                ["MethodId"] = methodId
+            }))
+            {
+                var sw = Stopwatch.StartNew();
+                _logger.LogInformation("カテゴリ取得(Ajax)開始");
+
+                try
+                {
+                    var list = LoadCategories(methodId);
+                    _logger.LogInformation("カテゴリ取得(Ajax)成功 count={Count} elapsedMs={ElapsedMs}",
+                        list.Count, sw.ElapsedMilliseconds);
+                    return new JsonResult(list);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "カテゴリ取得(Ajax)失敗 elapsedMs={ElapsedMs}", sw.ElapsedMilliseconds);
+                    // クライアントに詳細を返しすぎない
+                    Response.StatusCode = 500;
+                    return new JsonResult(new { error = "カテゴリ取得に失敗しました。" });
+                }
+            }
         }
 
         // Ajax: カテゴリIDから品目一覧を返す
         public JsonResult OnGetConsumables(int categoryId)
         {
-            var list = LoadConsumables(categoryId);
-            return new JsonResult(list);
+            var correlationId = HttpContext.TraceIdentifier;
+            var userName = User.Identity?.Name ?? "anonymous";
+
+            using (_logger.BeginScope(new Dictionary<string, object?>
+            {
+                ["Handler"] = "OnGetConsumables",
+                ["CorrelationId"] = correlationId,
+                ["UserName"] = userName,
+                ["CategoryId"] = categoryId
+            }))
+            {
+                var sw = Stopwatch.StartNew();
+                _logger.LogInformation("品目取得(Ajax)開始");
+
+                try
+                {
+                    var list = LoadConsumables(categoryId);
+                    _logger.LogInformation("品目取得(Ajax)成功 count={Count} elapsedMs={ElapsedMs}",
+                        list.Count, sw.ElapsedMilliseconds);
+                    return new JsonResult(list);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "品目取得(Ajax)失敗 elapsedMs={ElapsedMs}", sw.ElapsedMilliseconds);
+                    Response.StatusCode = 500;
+                    return new JsonResult(new { error = "品目取得に失敗しました。" });
+                }
+            }
         }
 
         public IActionResult OnPost()
         {
-            if (!ModelState.IsValid)
+            var correlationId = HttpContext.TraceIdentifier;
+            var orderUserName = User.Identity?.Name ?? "system";
+            var orderNo = DateTime.Now.ToString("yyyyMMddHHmmss");
+            var jstNow = DateTimeUtils.GetJstNow();
+
+            using (_logger.BeginScope(new Dictionary<string, object?>
             {
-                LoadOrderingMethods();
-                if (OrderingMethodId.HasValue) Categories = LoadCategories(OrderingMethodId.Value);
-                if (CategoryId.HasValue) Consumables = LoadConsumables(CategoryId.Value);
-                return Page();
-            }
-
-            string connStr = _configuration.GetConnectionString("GeneralAffairsDb");
-            string orderNo = DateTime.Now.ToString("yyyyMMddHHmmss");
-            string orderUserName = User.Identity?.Name ?? "system";
-            DateTime jstNow = DateTimeUtils.GetJstNow();
-
-            try
+                ["Handler"] = "OnPost",
+                ["CorrelationId"] = correlationId,
+                ["OrderNo"] = orderNo,
+                ["UserName"] = orderUserName,
+                ["OrderingMethodId"] = OrderingMethodId,
+                ["CategoryId"] = CategoryId,
+                ["ConsumablesId"] = ConsumablesId,
+                ["Quantity"] = Quantity
+            }))
             {
-                using var conn = new SqlConnection(connStr);
-                conn.Open();
-                using var tran = conn.BeginTransaction();
+                var sw = Stopwatch.StartNew();
+                _logger.LogInformation("新規発注登録開始");
 
-                // 整合性チェック（発注方法・カテゴリ・品目の組み合わせ確認）
-                using (var cmd = new SqlCommand(@"
+                if (!ModelState.IsValid)
+                {
+                    // 入力不備はエラーではなく Warning で十分
+                    _logger.LogWarning("入力バリデーションNG。画面再表示。");
+                    ReloadForPage();
+                    return Page();
+                }
+
+                string connStr = _configuration.GetConnectionString("GeneralAffairsDb");
+
+                try
+                {
+                    using var conn = new SqlConnection(connStr);
+                    conn.Open();
+                    _logger.LogInformation("DB接続成功");
+
+                    using var tran = conn.BeginTransaction();
+                    _logger.LogInformation("トランザクション開始");
+
+                    // 1) 整合性チェック
+                    _logger.LogInformation("整合性チェック開始");
+                    using (var cmd = new SqlCommand(@"
 SELECT COUNT(1)
 FROM TM_CONSUMABLES s
 JOIN TM_CONSUMABLES_CATEGORY c ON c.ID = s.CATEGORY_ID
@@ -97,49 +205,51 @@ WHERE s.ID = @ConsumablesId
   AND c.METHOD_ID = @MethodId
   AND c.DELETE_FLAG = 0;
 ", conn, tran))
-                {
-                    cmd.Parameters.AddWithValue("@ConsumablesId", ConsumablesId!.Value);
-                    cmd.Parameters.AddWithValue("@CategoryId", CategoryId!.Value);
-                    cmd.Parameters.AddWithValue("@MethodId", OrderingMethodId!.Value);
-
-                    var ok = (int)cmd.ExecuteScalar() == 1;
-                    if (!ok)
                     {
-                        tran.Rollback();
-                        ModelState.AddModelError(string.Empty, "選択内容に不整合があります（発注方法・カテゴリ・品目の組み合わせを確認してください）。");
-                        LoadOrderingMethods();
-                        Categories = LoadCategories(OrderingMethodId.Value);
-                        Consumables = LoadConsumables(CategoryId.Value);
-                        return Page();
-                    }
-                }
+                        cmd.Parameters.AddWithValue("@ConsumablesId", ConsumablesId!.Value);
+                        cmd.Parameters.AddWithValue("@CategoryId", CategoryId!.Value);
+                        cmd.Parameters.AddWithValue("@MethodId", OrderingMethodId!.Value);
 
-                // 単価取得（品目IDで取得）
-                int unitPrice;
-                using (var cmd = new SqlCommand(@"
+                        var ok = (int)cmd.ExecuteScalar() == 1;
+                        if (!ok)
+                        {
+                            _logger.LogWarning("整合性チェックNG（組み合わせ不整合）。ロールバックします。");
+                            tran.Rollback();
+                            ModelState.AddModelError(string.Empty, "選択内容に不整合があります（発注方法・カテゴリ・品目の組み合わせを確認してください）。");
+                            ReloadForPage();
+                            return Page();
+                        }
+                    }
+                    _logger.LogInformation("整合性チェックOK");
+
+                    // 2) 単価取得
+                    _logger.LogInformation("単価取得開始");
+                    int unitPrice;
+                    using (var cmd = new SqlCommand(@"
 SELECT UNIT_PRICE
 FROM TM_CONSUMABLES
 WHERE ID = @ConsumablesId
   AND DELETE_FLAG = 0;
 ", conn, tran))
-                {
-                    cmd.Parameters.AddWithValue("@ConsumablesId", ConsumablesId!.Value);
-                    object? result = cmd.ExecuteScalar();
-                    if (result == null)
                     {
-                        tran.Rollback();
-                        ModelState.AddModelError(string.Empty, "品目が存在しません。");
-                        LoadOrderingMethods();
-                        Categories = LoadCategories(OrderingMethodId.Value);
-                        Consumables = LoadConsumables(CategoryId.Value);
-                        return Page();
+                        cmd.Parameters.AddWithValue("@ConsumablesId", ConsumablesId!.Value);
+                        object? result = cmd.ExecuteScalar();
+                        if (result == null)
+                        {
+                            _logger.LogWarning("単価取得NG（品目が存在しない）。ロールバックします。");
+                            tran.Rollback();
+                            ModelState.AddModelError(string.Empty, "品目が存在しません。");
+                            ReloadForPage();
+                            return Page();
+                        }
+                        unitPrice = Convert.ToInt32(result);
                     }
-                    unitPrice = Convert.ToInt32(result);
-                }
+                    _logger.LogInformation("単価取得OK unitPrice={UnitPrice}", unitPrice);
 
-                // 親テーブルに登録（発注方法は保持しない）
-                int newOrderId;
-                using (var cmd = new SqlCommand(@"
+                    // 3) 親テーブル登録
+                    _logger.LogInformation("親テーブル登録開始");
+                    int newOrderId;
+                    using (var cmd = new SqlCommand(@"
 INSERT INTO TD_ORDER
     (ORDER_NO,
      ORDER_DATE,
@@ -162,19 +272,21 @@ VALUES
      1,
      0);
 ", conn, tran))
-                {
-                    cmd.Parameters.AddWithValue("@OrderNo", orderNo);
-                    cmd.Parameters.AddWithValue("@OrderDate", jstNow);
-                    cmd.Parameters.AddWithValue("@CreateDateTime", jstNow);
-                    cmd.Parameters.AddWithValue("@UpdateDateTime", jstNow);
-                    cmd.Parameters.AddWithValue("@OrderUserName", orderUserName);
-                    cmd.Parameters.AddWithValue("@ContactOrderName", orderUserName);
+                    {
+                        cmd.Parameters.AddWithValue("@OrderNo", orderNo);
+                        cmd.Parameters.AddWithValue("@OrderDate", jstNow);
+                        cmd.Parameters.AddWithValue("@CreateDateTime", jstNow);
+                        cmd.Parameters.AddWithValue("@UpdateDateTime", jstNow);
+                        cmd.Parameters.AddWithValue("@OrderUserName", orderUserName);
+                        cmd.Parameters.AddWithValue("@ContactOrderName", orderUserName);
 
-                    newOrderId = (int)cmd.ExecuteScalar();
-                }
+                        newOrderId = (int)cmd.ExecuteScalar();
+                    }
+                    _logger.LogInformation("親テーブル登録OK newOrderId={NewOrderId}", newOrderId);
 
-                // 明細テーブルに登録
-                using (var cmd = new SqlCommand(@"
+                    // 4) 明細登録
+                    _logger.LogInformation("明細登録開始");
+                    using (var cmd = new SqlCommand(@"
 INSERT INTO TD_ORDER_DETAILS
     (ORDER_ID,
      SEQ_NO,
@@ -202,36 +314,53 @@ VALUES
      @CreateDateTime,
      @UpdateDateTime);
 ", conn, tran))
-                {
-                    cmd.Parameters.AddWithValue("@OrderId", newOrderId);
-                    cmd.Parameters.AddWithValue("@ConsumablesId", ConsumablesId!.Value);
-                    cmd.Parameters.AddWithValue("@OrderQuantity", Quantity);
-                    cmd.Parameters.AddWithValue("@OrderUnitName", "NoData");
-                    cmd.Parameters.AddWithValue("@UnitPrice", unitPrice);
-                    cmd.Parameters.AddWithValue("@CreateDateTime", jstNow);
-                    cmd.Parameters.AddWithValue("@UpdateDateTime", jstNow);
+                    {
+                        cmd.Parameters.AddWithValue("@OrderId", newOrderId);
+                        cmd.Parameters.AddWithValue("@ConsumablesId", ConsumablesId!.Value);
+                        cmd.Parameters.AddWithValue("@OrderQuantity", Quantity);
+                        cmd.Parameters.AddWithValue("@OrderUnitName", "NoData");
+                        cmd.Parameters.AddWithValue("@UnitPrice", unitPrice);
+                        cmd.Parameters.AddWithValue("@CreateDateTime", jstNow);
+                        cmd.Parameters.AddWithValue("@UpdateDateTime", jstNow);
 
-                    cmd.ExecuteNonQuery();
+                        cmd.ExecuteNonQuery();
+                    }
+                    _logger.LogInformation("明細登録OK");
+
+                    // 5) コミット
+                    tran.Commit();
+                    _logger.LogInformation("トランザクションCommit完了 elapsedMs={ElapsedMs}", sw.ElapsedMilliseconds);
+
+                    return RedirectToPage("/Complete");
+                }
+                catch (SqlException ex)
+                {
+                    _logger.LogError(ex, "SQL例外（DB接続/クエリ/トランザクション） elapsedMs={ElapsedMs}", sw.ElapsedMilliseconds);
+                    ModelState.AddModelError(string.Empty, "データベースエラーが発生しました。");
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "想定外例外（新規発注登録） elapsedMs={ElapsedMs}", sw.ElapsedMilliseconds);
+                    ModelState.AddModelError(string.Empty, "登録中にエラーが発生しました。");
                 }
 
-                tran.Commit();
-            }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError(string.Empty, "登録中にエラーが発生しました。" + ex.Message);
-                LoadOrderingMethods();
-                if (OrderingMethodId.HasValue) Categories = LoadCategories(OrderingMethodId.Value);
-                if (CategoryId.HasValue) Consumables = LoadConsumables(CategoryId.Value);
+                // 例外時のみ画面再表示
+                ReloadForPage();
                 return Page();
             }
-
-            return RedirectToPage("/Complete");
         }
 
         public IActionResult OnPostCancel()
         {
-            // 新規発注画面の初期表示にリダイレクト
+            _logger.LogInformation("新規発注キャンセル");
             return RedirectToPage("/NewOrder");
+        }
+
+        private void ReloadForPage()
+        {
+            LoadOrderingMethods();
+            if (OrderingMethodId.HasValue) Categories = LoadCategories(OrderingMethodId.Value);
+            if (CategoryId.HasValue) Consumables = LoadConsumables(CategoryId.Value);
         }
 
         private void LoadOrderingMethods()
