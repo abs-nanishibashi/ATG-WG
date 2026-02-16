@@ -1,21 +1,39 @@
-name: Deploy to Azure Web App
+name: Deploy .NET app to Azure Web App
 
 on:
   push:
-    branches: [ "main" ]  # main に push されたら実行
+    branches: [ "main" ]
 
 jobs:
-  deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-      # リポジトリのコードを取得
       - uses: actions/checkout@v4
 
-      # Azure App Service にデプロイ
+      # .NET SDK を用意
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      # ソリューション/プロジェクトがあるフォルダでビルド/発行
+      - name: Restore
+        working-directory: ./GeneralAffairsManagementProject
+        run: dotnet restore
+
+      - name: Build
+        working-directory: ./GeneralAffairsManagementProject
+        run: dotnet build -c Release --no-restore
+
+      - name: Publish # ルート直下に publish フォルダを吐く
+        working-directory: ./GeneralAffairsManagementProject
+        run: dotnet publish -c Release -o ../publish --no-build
+        
+      # 生成物を App Service に配備（Publish Profile 方式）
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
-          app-name: paas-atg-app
+          app-name: paas-atg-app                  # ← App Service 名
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE }}
-          package: .
+          package: ./publish                       # ← さきほど出力した成果物フォルダ
