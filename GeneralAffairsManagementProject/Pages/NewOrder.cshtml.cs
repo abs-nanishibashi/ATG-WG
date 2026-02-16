@@ -18,7 +18,7 @@ namespace GeneralAffairsManagementProject.Pages
             _logger = logger;
         }
 
-        // 画面から受け取るID
+        // IDs received from the page
         [BindProperty]
         [Required(ErrorMessage = "発注方法を選択してください。")]
         public int? OrderingMethodId { get; set; }
@@ -35,14 +35,14 @@ namespace GeneralAffairsManagementProject.Pages
         [Range(1, 99, ErrorMessage = "数量は 1～99 の範囲で入力してください。")]
         public int Quantity { get; set; }
 
-        // プルダウン候補
+        // Dropdown candidates
         public List<OrderingMethodDto> OrderingMethods { get; set; } = new();
         public List<CategoryDto> Categories { get; set; } = new();
         public List<ConsumablesDto> Consumables { get; set; } = new();
 
         public void OnGet()
         {
-            // リクエスト相関用の情報（AIのoperation_Idとは別に、アプリ側で追いたい時用）
+            // Info for request correlation (separate from AI operation_Id; for app-side tracing)
             var correlationId = HttpContext.TraceIdentifier;
             var userName = User.Identity?.Name ?? "anonymous";
 
@@ -54,38 +54,38 @@ namespace GeneralAffairsManagementProject.Pages
             }))
             {
                 var sw = Stopwatch.StartNew();
-                _logger.LogInformation("新規発注画面 初期表示開始");
+                _logger.LogInformation("New order page: initial load started");
 
                 try
                 {
                     LoadOrderingMethods();
-                    _logger.LogInformation("発注方法候補ロード完了 count={Count}", OrderingMethods.Count);
+                    _logger.LogInformation("Ordering method candidates loaded count={Count}", OrderingMethods.Count);
 
                     if (OrderingMethodId.HasValue)
                     {
                         Categories = LoadCategories(OrderingMethodId.Value);
-                        _logger.LogInformation("カテゴリ候補ロード完了 methodId={MethodId} count={Count}",
+                        _logger.LogInformation("Category candidates loaded methodId={MethodId} count={Count}",
                             OrderingMethodId.Value, Categories.Count);
                     }
 
                     if (CategoryId.HasValue)
                     {
                         Consumables = LoadConsumables(CategoryId.Value);
-                        _logger.LogInformation("品目候補ロード完了 categoryId={CategoryId} count={Count}",
+                        _logger.LogInformation("Item candidates loaded categoryId={CategoryId} count={Count}",
                             CategoryId.Value, Consumables.Count);
                     }
 
-                    _logger.LogInformation("新規発注画面 初期表示終了 elapsedMs={ElapsedMs}", sw.ElapsedMilliseconds);
+                    _logger.LogInformation("New order page: initial load completed elapsedMs={ElapsedMs}", sw.ElapsedMilliseconds);
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "新規発注画面 初期表示中に例外発生 elapsedMs={ElapsedMs}", sw.ElapsedMilliseconds);
-                    throw; // 画面初期表示で落ちるなら例外としても把握できるようにする
+                    _logger.LogError(ex, "Exception occurred during new order page initial load elapsedMs={ElapsedMs}", sw.ElapsedMilliseconds);
+                    throw; // If the page fails to load, rethrow so it can be detected as an exception
                 }
             }
         }
 
-        // Ajax: 発注方法IDからカテゴリ一覧を返す
+        // Ajax: return category list by ordering method id
         public JsonResult OnGetCategories(int methodId)
         {
             var correlationId = HttpContext.TraceIdentifier;
@@ -100,26 +100,26 @@ namespace GeneralAffairsManagementProject.Pages
             }))
             {
                 var sw = Stopwatch.StartNew();
-                _logger.LogInformation("カテゴリ取得(Ajax)開始");
+                _logger.LogInformation("Get categories (Ajax) started");
 
                 try
                 {
                     var list = LoadCategories(methodId);
-                    _logger.LogInformation("カテゴリ取得(Ajax)成功 count={Count} elapsedMs={ElapsedMs}",
+                    _logger.LogInformation("Get categories (Ajax) succeeded count={Count} elapsedMs={ElapsedMs}",
                         list.Count, sw.ElapsedMilliseconds);
                     return new JsonResult(list);
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "カテゴリ取得(Ajax)失敗 elapsedMs={ElapsedMs}", sw.ElapsedMilliseconds);
-                    // クライアントに詳細を返しすぎない
+                    _logger.LogError(ex, "Get categories (Ajax) failed elapsedMs={ElapsedMs}", sw.ElapsedMilliseconds);
+                    // Do not return too much detail to the client
                     Response.StatusCode = 500;
-                    return new JsonResult(new { error = "カテゴリ取得に失敗しました。" });
+                    return new JsonResult(new { error = "Failed to retrieve categories." });
                 }
             }
         }
 
-        // Ajax: カテゴリIDから品目一覧を返す
+        // Ajax: return item list by category id
         public JsonResult OnGetConsumables(int categoryId)
         {
             var correlationId = HttpContext.TraceIdentifier;
@@ -134,20 +134,20 @@ namespace GeneralAffairsManagementProject.Pages
             }))
             {
                 var sw = Stopwatch.StartNew();
-                _logger.LogInformation("品目取得(Ajax)開始");
+                _logger.LogInformation("Get items (Ajax) started");
 
                 try
                 {
                     var list = LoadConsumables(categoryId);
-                    _logger.LogInformation("品目取得(Ajax)成功 count={Count} elapsedMs={ElapsedMs}",
+                    _logger.LogInformation("Get items (Ajax) succeeded count={Count} elapsedMs={ElapsedMs}",
                         list.Count, sw.ElapsedMilliseconds);
                     return new JsonResult(list);
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "品目取得(Ajax)失敗 elapsedMs={ElapsedMs}", sw.ElapsedMilliseconds);
+                    _logger.LogError(ex, "Get items (Ajax) failed elapsedMs={ElapsedMs}", sw.ElapsedMilliseconds);
                     Response.StatusCode = 500;
-                    return new JsonResult(new { error = "品目取得に失敗しました。" });
+                    return new JsonResult(new { error = "Failed to retrieve items." });
                 }
             }
         }
@@ -172,12 +172,12 @@ namespace GeneralAffairsManagementProject.Pages
             }))
             {
                 var sw = Stopwatch.StartNew();
-                _logger.LogInformation("新規発注登録開始");
+                _logger.LogInformation("Create new order started");
 
                 if (!ModelState.IsValid)
                 {
-                    // 入力不備はエラーではなく Warning で十分
-                    _logger.LogWarning("入力バリデーションNG。画面再表示。");
+                    // Input issues are warnings, not errors
+                    _logger.LogWarning("Input validation failed. Re-displaying the page.");
                     ReloadForPage();
                     return Page();
                 }
@@ -188,13 +188,13 @@ namespace GeneralAffairsManagementProject.Pages
                 {
                     using var conn = new SqlConnection(connStr);
                     conn.Open();
-                    _logger.LogInformation("DB接続成功");
+                    _logger.LogInformation("Database connection succeeded");
 
                     using var tran = conn.BeginTransaction();
-                    _logger.LogInformation("トランザクション開始");
+                    _logger.LogInformation("Transaction started");
 
-                    // 1) 整合性チェック
-                    _logger.LogInformation("整合性チェック開始");
+                    // 1) Consistency check
+                    _logger.LogInformation("Consistency check started");
                     using (var cmd = new SqlCommand(@"
 SELECT COUNT(1)
 FROM TM_CONSUMABLES s
@@ -213,17 +213,17 @@ WHERE s.ID = @ConsumablesId
                         var ok = (int)cmd.ExecuteScalar() == 1;
                         if (!ok)
                         {
-                            _logger.LogWarning("整合性チェックNG（組み合わせ不整合）。ロールバックします。");
+                            _logger.LogWarning("Consistency check failed (invalid combination). Rolling back.");
                             tran.Rollback();
-                            ModelState.AddModelError(string.Empty, "選択内容に不整合があります（発注方法・カテゴリ・品目の組み合わせを確認してください）。");
+                            ModelState.AddModelError(string.Empty, "The selected values are inconsistent. Please verify the ordering method, category, and item combination.");
                             ReloadForPage();
                             return Page();
                         }
                     }
-                    _logger.LogInformation("整合性チェックOK");
+                    _logger.LogInformation("Consistency check passed");
 
-                    // 2) 単価取得
-                    _logger.LogInformation("単価取得開始");
+                    // 2) Get unit price
+                    _logger.LogInformation("Unit price lookup started");
                     int unitPrice;
                     using (var cmd = new SqlCommand(@"
 SELECT UNIT_PRICE
@@ -236,18 +236,18 @@ WHERE ID = @ConsumablesId
                         object? result = cmd.ExecuteScalar();
                         if (result == null)
                         {
-                            _logger.LogWarning("単価取得NG（品目が存在しない）。ロールバックします。");
+                            _logger.LogWarning("Unit price lookup failed (item does not exist). Rolling back.");
                             tran.Rollback();
-                            ModelState.AddModelError(string.Empty, "品目が存在しません。");
+                            ModelState.AddModelError(string.Empty, "The selected item does not exist.");
                             ReloadForPage();
                             return Page();
                         }
                         unitPrice = Convert.ToInt32(result);
                     }
-                    _logger.LogInformation("単価取得OK unitPrice={UnitPrice}", unitPrice);
+                    _logger.LogInformation("Unit price lookup succeeded unitPrice={UnitPrice}", unitPrice);
 
-                    // 3) 親テーブル登録
-                    _logger.LogInformation("親テーブル登録開始");
+                    // 3) Insert header
+                    _logger.LogInformation("Order header insert started");
                     int newOrderId;
                     using (var cmd = new SqlCommand(@"
 INSERT INTO TD_ORDER
@@ -282,10 +282,10 @@ VALUES
 
                         newOrderId = (int)cmd.ExecuteScalar();
                     }
-                    _logger.LogInformation("親テーブル登録OK newOrderId={NewOrderId}", newOrderId);
+                    _logger.LogInformation("Order header insert succeeded newOrderId={NewOrderId}", newOrderId);
 
-                    // 4) 明細登録
-                    _logger.LogInformation("明細登録開始");
+                    // 4) Insert detail
+                    _logger.LogInformation("Order detail insert started");
                     using (var cmd = new SqlCommand(@"
 INSERT INTO TD_ORDER_DETAILS
     (ORDER_ID,
@@ -325,26 +325,26 @@ VALUES
 
                         cmd.ExecuteNonQuery();
                     }
-                    _logger.LogInformation("明細登録OK");
+                    _logger.LogInformation("Order detail insert succeeded");
 
-                    // 5) コミット
+                    // 5) Commit
                     tran.Commit();
-                    _logger.LogInformation("トランザクションCommit完了 elapsedMs={ElapsedMs}", sw.ElapsedMilliseconds);
+                    _logger.LogInformation("Transaction committed elapsedMs={ElapsedMs}", sw.ElapsedMilliseconds);
 
                     return RedirectToPage("/Complete");
                 }
                 catch (SqlException ex)
                 {
-                    _logger.LogError(ex, "SQL例外（DB接続/クエリ/トランザクション） elapsedMs={ElapsedMs}", sw.ElapsedMilliseconds);
-                    ModelState.AddModelError(string.Empty, "データベースエラーが発生しました。");
+                    _logger.LogError(ex, "SQL exception (DB connection/query/transaction) elapsedMs={ElapsedMs}", sw.ElapsedMilliseconds);
+                    ModelState.AddModelError(string.Empty, "A database error occurred.");
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "想定外例外（新規発注登録） elapsedMs={ElapsedMs}", sw.ElapsedMilliseconds);
-                    ModelState.AddModelError(string.Empty, "登録中にエラーが発生しました。");
+                    _logger.LogError(ex, "Unexpected exception (create new order) elapsedMs={ElapsedMs}", sw.ElapsedMilliseconds);
+                    ModelState.AddModelError(string.Empty, "An error occurred during registration.");
                 }
 
-                // 例外時のみ画面再表示
+                // Re-display only when an exception occurs
                 ReloadForPage();
                 return Page();
             }
@@ -352,7 +352,7 @@ VALUES
 
         public IActionResult OnPostCancel()
         {
-            _logger.LogInformation("新規発注キャンセル");
+            _logger.LogInformation("New order canceled");
             return RedirectToPage("/NewOrder");
         }
 
