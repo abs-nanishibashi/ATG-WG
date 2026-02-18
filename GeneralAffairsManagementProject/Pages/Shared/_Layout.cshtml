@@ -1,16 +1,15 @@
 ﻿@using Microsoft.AspNetCore.Mvc.Razor
 @using System.Security.Claims;
+
 @{
     var currentPage = (ViewContext.RouteData.Values["page"] as string ?? "").ToLowerInvariant();
     bool IsActive(string page) => currentPage == page.ToLowerInvariant();
 }
 @{
-    // UserやUser.Identityがnullの場合も考慮して安全に取得
-    var userName = (User?.Identity != null && User.Identity.IsAuthenticated)
-        ? (User.Claims.FirstOrDefault(c => c.Type == "name")?.Value
-            ?? User.Claims.FirstOrDefault(c => c.Type == "preferred_username")?.Value
-            ?? User.Identity.Name)
-        : null;
+    var userId =
+        User.FindFirst("http://schemas.microsoft.com/identity/claims/objectidentifier")?.Value
+        ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+        ?? User.FindFirst("sub")?.Value;
 }
 <!DOCTYPE html>
 <html lang="ja">
@@ -142,13 +141,18 @@
                 <div class="container-fluid py-2 d-flex align-items-center gap-2">
                     <div class="ms-auto d-flex align-items-center gap-2">
                         @* 右上に将来：ユーザー、通知、ヘルプ等を置く余白 *@
-                        @if (!string.IsNullOrEmpty(userName))
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <div class="px-3 mt-3 mb-2">
+                <span>ログインユーザー: <strong>@userId</strong></span>
+</div>
+                        }
+                        else
                         {
             <div class="px-3 mt-3 mb-2">
-                <span>ログインユーザー: <strong>@userName</strong></span>
-            </div>
+            未ログイン</div>
                         }
-                    </div>
+
                 </div>
             </header>
 
