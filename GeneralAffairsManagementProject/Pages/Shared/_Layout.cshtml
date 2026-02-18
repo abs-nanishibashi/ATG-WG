@@ -131,12 +131,6 @@
                          発注確認
                         </a>
                     </nav>
-                    @if (!string.IsNullOrEmpty(userName))
-                    {
-        <div class="px-3 mt-3 mb-2">
-            <span>ログインユーザー: <strong>@userName</strong></span>
-        </div>
-                    }
 
                 </div>
             </div>
@@ -148,6 +142,12 @@
                 <div class="container-fluid py-2 d-flex align-items-center gap-2">
                     <div class="ms-auto d-flex align-items-center gap-2">
                         @* 右上に将来：ユーザー、通知、ヘルプ等を置く余白 *@
+                        @if (!string.IsNullOrEmpty(userName))
+                        {
+            <div class="px-3 mt-3 mb-2">
+                <span>ログインユーザー: <strong>@userName</strong></span>
+            </div>
+                        }
                     </div>
                 </div>
             </header>
