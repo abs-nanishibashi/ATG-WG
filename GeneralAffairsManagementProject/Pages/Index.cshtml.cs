@@ -309,24 +309,98 @@ namespace GeneralAffairsManagementProject.Pages
             ValidationErrors.Clear();
             bool isValid = true;
 
-            // 発注日チェック
+            // すべての検索条件が未入力かチェック
+            bool hasAnyCondition = SearchCondition.OrderingMethodId.HasValue
+                || !string.IsNullOrWhiteSpace(SearchCondition.OrderUser)
+                || !string.IsNullOrWhiteSpace(SearchCondition.ItemNumber)
+                || SearchCondition.StatusId.HasValue
+                || SearchCondition.OrderDateFrom.HasValue
+                || SearchCondition.OrderDateTo.HasValue
+                || SearchCondition.DeliveryDateFrom.HasValue
+                || SearchCondition.DeliveryDateTo.HasValue;
+
+            if (!hasAnyCondition)
+            {
+                ValidationErrors["General"] = "検索条件を1つ以上指定してください。";
+                _logger.LogWarning("Search attempted with no conditions specified.");
+                isValid = false;
+            }
+
+            // SQL Server datetime型の範囲
+            var minDate = new DateTime(1753, 1, 1);
+            var maxDate = new DateTime(9999, 12, 31);
+
+            // 発注日From - 範囲チェック
+            if (SearchCondition.OrderDateFrom.HasValue)
+            {
+                if (SearchCondition.OrderDateFrom.Value < minDate || SearchCondition.OrderDateFrom.Value > maxDate)
+                {
+                    ValidationErrors["OrderDateFrom"] = $"発注日(From)は{minDate:yyyy/MM/dd}から{maxDate:yyyy/MM/dd}の範囲で入力してください。";
+                    _logger.LogWarning("OrderDateFrom out of range: {OrderDateFrom}", SearchCondition.OrderDateFrom.Value);
+                    isValid = false;
+                }
+            }
+
+            // 発注日To - 範囲チェック
+            if (SearchCondition.OrderDateTo.HasValue)
+            {
+                if (SearchCondition.OrderDateTo.Value < minDate || SearchCondition.OrderDateTo.Value > maxDate)
+                {
+                    ValidationErrors["OrderDateTo"] = $"発注日(To)は{minDate:yyyy/MM/dd}から{maxDate:yyyy/MM/dd}の範囲で入力してください。";
+                    _logger.LogWarning("OrderDateTo out of range: {OrderDateTo}", SearchCondition.OrderDateTo.Value);
+                    isValid = false;
+                }
+            }
+
+            // 発注日 - From/To相関チェック
             if (SearchCondition.OrderDateFrom.HasValue && SearchCondition.OrderDateTo.HasValue)
             {
                 if (SearchCondition.OrderDateFrom.Value > SearchCondition.OrderDateTo.Value)
                 {
                     ValidationErrors["OrderDate"] = "発注日(From)は発注日(To)以前の日付を指定してください。";
+                    _logger.LogWarning("OrderDateFrom > OrderDateTo: From={OrderDateFrom}, To={OrderDateTo}",
+                        SearchCondition.OrderDateFrom.Value, SearchCondition.OrderDateTo.Value);
                     isValid = false;
                 }
             }
 
-            // 納品日チェック
+            // 納品日From - 範囲チェック
+            if (SearchCondition.DeliveryDateFrom.HasValue)
+            {
+                if (SearchCondition.DeliveryDateFrom.Value < minDate || SearchCondition.DeliveryDateFrom.Value > maxDate)
+                {
+                    ValidationErrors["DeliveryDateFrom"] = $"納品日(From)は{minDate:yyyy/MM/dd}から{maxDate:yyyy/MM/dd}の範囲で入力してください。";
+                    _logger.LogWarning("DeliveryDateFrom out of range: {DeliveryDateFrom}", SearchCondition.DeliveryDateFrom.Value);
+                    isValid = false;
+                }
+            }
+
+            // 納品日To - 範囲チェック
+            if (SearchCondition.DeliveryDateTo.HasValue)
+            {
+                if (SearchCondition.DeliveryDateTo.Value < minDate || SearchCondition.DeliveryDateTo.Value > maxDate)
+                {
+                    ValidationErrors["DeliveryDateTo"] = $"納品日(To)は{minDate:yyyy/MM/dd}から{maxDate:yyyy/MM/dd}の範囲で入力してください。";
+                    _logger.LogWarning("DeliveryDateTo out of range: {DeliveryDateTo}", SearchCondition.DeliveryDateTo.Value);
+                    isValid = false;
+                }
+            }
+
+            // 納品日 - From/To相関チェック
             if (SearchCondition.DeliveryDateFrom.HasValue && SearchCondition.DeliveryDateTo.HasValue)
             {
                 if (SearchCondition.DeliveryDateFrom.Value > SearchCondition.DeliveryDateTo.Value)
                 {
                     ValidationErrors["DeliveryDate"] = "納品日(From)は納品日(To)以前の日付を指定してください。";
+                    _logger.LogWarning("DeliveryDateFrom > DeliveryDateTo: From={DeliveryDateFrom}, To={DeliveryDateTo}",
+                        SearchCondition.DeliveryDateFrom.Value, SearchCondition.DeliveryDateTo.Value);
                     isValid = false;
                 }
+            }
+
+            if (!isValid)
+            {
+                _logger.LogWarning("Search condition validation failed. Errors: {@ValidationErrors}", ValidationErrors);
             }
 
             return isValid;

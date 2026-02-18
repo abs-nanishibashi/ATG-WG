@@ -4,15 +4,15 @@
     ViewData["Title"] = "新規発注画面";
 }
 
-<h2>@ViewData["Title"]</h2>
+<h1>@ViewData["Title"]</h1>
 
-<form method="post">
+<form method="post" novalidate>
     <div class="form-group">
         <label>発注方法</label>
         <select asp-for="OrderingMethodId"
                 id="orderingMethod"
                 class="form-control">
-            <option value="">選択してください</option>
+            <option value="" disabled selected>-- 選択してください --</option>
             @foreach (var m in Model.OrderingMethods)
             {
                 <option value="@m.Id">@m.Name</option>
@@ -27,7 +27,11 @@
                 id="categorySelect"
                 class="form-control"
                 disabled>
-            <option value="">選択してください</option>
+            <option value="" disabled selected>-- 選択してください --</option>
+            @foreach (var c in Model.Categories)
+            {
+                <option value="@c.Id">@c.Name</option>
+            }
         </select>
         <span asp-validation-for="CategoryId" class="text-danger"></span>
     </div>
@@ -37,9 +41,12 @@
         <select asp-for="ConsumablesId"
                 id="itemSelect"
                 class="form-control"
-                disabled
-                required>
-            <option value="">選択してください</option>
+                disabled>
+            <option value="" disabled selected>-- 選択してください --</option>
+            @foreach (var item in Model.Consumables)
+            {
+                <option value="@item.Id">@item.Name</option>
+            }
         </select>
         <span asp-validation-for="ConsumablesId" class="text-danger"></span>
     </div>
@@ -50,8 +57,7 @@
                type="number"
                class="form-control"
                min="1"
-               max="99"
-               required />
+               max="99" />
         <span asp-validation-for="Quantity" class="text-danger"></span>
     </div>
 
@@ -78,51 +84,108 @@
         const itemSelect = document.getElementById("itemSelect");
 
         function resetSelect(select) {
-            select.innerHTML = '<option value="">選択してください</option>';
+            select.innerHTML = '<option value="" disabled selected>-- 選択してください --</option>';
             select.disabled = true;
         }
 
-        methodSelect.addEventListener("change", async () => {
+        async function loadCategories(methodId, selectedCategoryId = null) {
             resetSelect(categorySelect);
             resetSelect(itemSelect);
 
-            if (!methodSelect.value) return;
+            if (!methodId) return;
 
-            const res = await fetch(`?handler=Categories&methodId=${methodSelect.value}`);
-            const list = await res.json();
+            try {
+                const res = await fetch(`?handler=Categories&methodId=${methodId}`);
+                if (!res.ok) {
+                    console.error('カテゴリの取得に失敗しました');
+                    return;
+                }
+                
+                const list = await res.json();
 
-            list.forEach(x => {
-                const opt = document.createElement("option");
-                opt.value = x.id;
-                opt.textContent = x.name;
-                categorySelect.appendChild(opt);
-            });
+                categorySelect.innerHTML = '<option value="" disabled>-- 選択してください --</option>';
 
-            categorySelect.disabled = false;
+                list.forEach(x => {
+                    const opt = document.createElement("option");
+                    opt.value = x.id;
+                    opt.textContent = x.name;
+                    if (selectedCategoryId && x.id == selectedCategoryId) {
+                        opt.selected = true;
+                    }
+                    categorySelect.appendChild(opt);
+                });
+
+                categorySelect.disabled = false;
+
+                if (!selectedCategoryId) {
+                    categorySelect.selectedIndex = 0;
+                }
+
+                if (selectedCategoryId) {
+                    await loadConsumables(selectedCategoryId, @(Model.ConsumablesId?.ToString() ?? "null"));
+                }
+            } catch (error) {
+                console.error('カテゴリの取得中にエラーが発生しました:', error);
+            }
+        }
+
+        async function loadConsumables(categoryId, selectedConsumablesId = null) {
+            resetSelect(itemSelect);
+
+            if (!categoryId) return;
+
+            try {
+                const res = await fetch(`?handler=Consumables&categoryId=${categoryId}`);
+                if (!res.ok) {
+                    console.error('品目の取得に失敗しました');
+                    return;
+                }
+                
+                const list = await res.json();
+
+                itemSelect.innerHTML = '<option value="" disabled>-- 選択してください --</option>';
+
+                list.forEach(x => {
+                    const opt = document.createElement("option");
+                    opt.value = x.id;
+                    opt.textContent = x.name;
+                    if (selectedConsumablesId && x.id == selectedConsumablesId) {
+                        opt.selected = true;
+                    }
+                    itemSelect.appendChild(opt);
+                });
+
+                itemSelect.disabled = false;
+
+                if (!selectedConsumablesId) {
+                    itemSelect.selectedIndex = 0;
+                }
+            } catch (error) {
+                console.error('品目の取得中にエラーが発生しました:', error);
+            }
+        }
+
+        methodSelect.addEventListener("change", async () => {
+            await loadCategories(methodSelect.value);
         });
 
         categorySelect.addEventListener("change", async () => {
-            resetSelect(itemSelect);
-
-            if (!categorySelect.value) return;
-
-            const res = await fetch(`?handler=Consumables&categoryId=${categorySelect.value}`);
-            const list = await res.json();
-
-            list.forEach(x => {
-                const opt = document.createElement("option");
-                opt.value = x.id;
-                opt.textContent = x.name;
-                itemSelect.appendChild(opt);
-            });
-
-            itemSelect.disabled = false;
+            await loadConsumables(categorySelect.value);
         });
 
-        // バリデーションエラーで戻った場合の復元
-        window.addEventListener("load", () => {
-            if (methodSelect.value) categorySelect.disabled = false;
-            if (categorySelect.value) itemSelect.disabled = false;
+        window.addEventListener("load", async () => {
+            const selectedMethodId = methodSelect.value;
+            const selectedCategoryId = @(Model.CategoryId?.ToString() ?? "null");
+
+            if (selectedMethodId) {
+                await loadCategories(selectedMethodId, selectedCategoryId);
+            } else if (@Model.Categories.Count > 0) {
+                categorySelect.disabled = false;
+            }
+
+            if (@Model.Consumables.Count > 0) {
+                itemSelect.disabled = false;
+            }
         });
     </script>
 }

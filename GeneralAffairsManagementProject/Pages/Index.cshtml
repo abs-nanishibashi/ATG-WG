@@ -10,6 +10,14 @@
     <!-- 検索条件 -->
     <div class="card mb-4">
         <div class="card-body">
+            <!-- 全体エラーメッセージ -->
+            @if (Model.ValidationErrors.ContainsKey("General"))
+            {
+                <div class="alert alert-warning" role="alert">
+                    <i class="bi bi-exclamation-triangle"></i> @Model.ValidationErrors["General"]
+                </div>
+            }
+
             <div class="row g-3">
                 <!-- 発注方法 -->
                 <div class="col-md-6">
@@ -62,7 +70,14 @@
                 <!-- 発注日From -->
                 <div class="col-md-6">
                     <label asp-for="SearchCondition.OrderDateFrom" class="form-label">発注日(From)</label>
-                    <input asp-for="SearchCondition.OrderDateFrom" class="form-control" type="date" />
+                    <input asp-for="SearchCondition.OrderDateFrom" class="form-control" type="date" 
+                           min="1753-01-01" max="9999-12-31" />
+                    @if (Model.ValidationErrors.ContainsKey("OrderDateFrom"))
+                    {
+                        <div class="text-danger small mt-1">
+                            <i class="bi bi-exclamation-circle"></i> @Model.ValidationErrors["OrderDateFrom"]
+                        </div>
+                    }
                     @if (Model.ValidationErrors.ContainsKey("OrderDate"))
                     {
                         <div class="text-danger small mt-1">
@@ -74,13 +89,27 @@
                 <!-- 発注日To -->
                 <div class="col-md-6">
                     <label asp-for="SearchCondition.OrderDateTo" class="form-label">発注日(To)</label>
-                    <input asp-for="SearchCondition.OrderDateTo" class="form-control" type="date" />
+                    <input asp-for="SearchCondition.OrderDateTo" class="form-control" type="date" 
+                           min="1753-01-01" max="9999-12-31" />
+                    @if (Model.ValidationErrors.ContainsKey("OrderDateTo"))
+                    {
+                        <div class="text-danger small mt-1">
+                            <i class="bi bi-exclamation-circle"></i> @Model.ValidationErrors["OrderDateTo"]
+                        </div>
+                    }
                 </div>
 
                 <!-- 納品日From -->
                 <div class="col-md-6">
                     <label asp-for="SearchCondition.DeliveryDateFrom" class="form-label">納品日(From)</label>
-                    <input asp-for="SearchCondition.DeliveryDateFrom" class="form-control" type="date" />
+                    <input asp-for="SearchCondition.DeliveryDateFrom" class="form-control" type="date" 
+                           min="1753-01-01" max="9999-12-31" />
+                    @if (Model.ValidationErrors.ContainsKey("DeliveryDateFrom"))
+                    {
+                        <div class="text-danger small mt-1">
+                            <i class="bi bi-exclamation-circle"></i> @Model.ValidationErrors["DeliveryDateFrom"]
+                        </div>
+                    }
                     @if (Model.ValidationErrors.ContainsKey("DeliveryDate"))
                     {
                         <div class="text-danger small mt-1">
@@ -92,7 +121,14 @@
                 <!-- 納品日To -->
                 <div class="col-md-6">
                     <label asp-for="SearchCondition.DeliveryDateTo" class="form-label">納品日(To)</label>
-                    <input asp-for="SearchCondition.DeliveryDateTo" class="form-control" type="date" />
+                    <input asp-for="SearchCondition.DeliveryDateTo" class="form-control" type="date" 
+                           min="1753-01-01" max="9999-12-31" />
+                    @if (Model.ValidationErrors.ContainsKey("DeliveryDateTo"))
+                    {
+                        <div class="text-danger small mt-1">
+                            <i class="bi bi-exclamation-circle"></i> @Model.ValidationErrors["DeliveryDateTo"]
+                        </div>
+                    }
                 </div>
 
                 <!-- ボタン -->

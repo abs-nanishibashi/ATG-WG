@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
+ï»¿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Data.SqlClient;
 using System.ComponentModel.DataAnnotations;
@@ -20,19 +20,19 @@ namespace GeneralAffairsManagementProject.Pages
 
         // IDs received from the page
         [BindProperty]
-        [Required(ErrorMessage = "”­’•û–@‚ğ‘I‘ğ‚µ‚Ä‚­‚¾‚³‚¢B")]
+        [Required(ErrorMessage = "ç™ºæ³¨æ–¹æ³•ã‚’é¸æŠã—ã¦ãã ã•ã„ã€‚")]
         public int? OrderingMethodId { get; set; }
 
         [BindProperty]
-        [Required(ErrorMessage = "ƒJƒeƒSƒŠ‚ğ‘I‘ğ‚µ‚Ä‚­‚¾‚³‚¢B")]
+        [Required(ErrorMessage = "ã‚«ãƒ†ã‚´ãƒªã‚’é¸æŠã—ã¦ãã ã•ã„ã€‚")]
         public int? CategoryId { get; set; }
 
         [BindProperty]
-        [Required(ErrorMessage = "•i–Ú‚ğ‘I‘ğ‚µ‚Ä‚­‚¾‚³‚¢B")]
+        [Required(ErrorMessage = "å“ç›®ã‚’é¸æŠã—ã¦ãã ã•ã„ã€‚")]
         public int? ConsumablesId { get; set; }
 
         [BindProperty]
-        [Range(1, 99, ErrorMessage = "”—Ê‚Í 1`99 ‚Ì”ÍˆÍ‚Å“ü—Í‚µ‚Ä‚­‚¾‚³‚¢B")]
+        [Range(1, 99, ErrorMessage = "æ•°é‡ã¯1ï½99ã®ç¯„å›²ã§å…¥åŠ›ã—ã¦ãã ã•ã„ã€‚")]
         public int Quantity { get; set; }
 
         // Dropdown candidates
