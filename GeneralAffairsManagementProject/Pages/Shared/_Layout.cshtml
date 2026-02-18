@@ -6,10 +6,10 @@
     bool IsActive(string page) => currentPage == page.ToLowerInvariant();
 }
 @{
-    var userId =
-        User.FindFirst("http://schemas.microsoft.com/identity/claims/objectidentifier")?.Value
-        ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value
-        ?? User.FindFirst("sub")?.Value;
+    var userName =
+        User.FindFirst("preferred_username")?.Value
+        ?? User.FindFirst("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress")?.Value
+        ?? User.Identity?.Name;
 }
 <!DOCTYPE html>
 <html lang="ja">
@@ -144,7 +144,7 @@
                         @if (User.Identity?.IsAuthenticated == true)
                         {
                             <div class="px-3 mt-3 mb-2">
-                <span>ログインユーザー: <strong>@userId</strong></span>
+                    <span>ログインユーザー: <strong>@userName</strong></span>
 </div>
                         }
                         else
