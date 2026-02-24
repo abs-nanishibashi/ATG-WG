@@ -90,6 +90,7 @@
             z-index: 1030;
             background: #ffffff;
             border-bottom: 1px solid rgba(0, 0, 0, .08);
+            margin-left:auto;
         }
         .main-body {
             padding: 1.25rem;
@@ -138,22 +139,18 @@
         <!-- ===== 右メイン領域 ===== -->
         <div class="main">
             <header class="main-header">
-                <div class="container-fluid py-2 d-flex align-items-center gap-2">
-                    <div class="ms-auto d-flex align-items-center gap-2">
                         @* 右上に将来：ユーザー、通知、ヘルプ等を置く余白 *@
                         @if (User.Identity?.IsAuthenticated == true)
                         {
-                            <div class="px-3 mt-3 mb-2">
-                    <span>ログインユーザー: <strong>@userName</strong></span>
-</div>
+                        <div class="px-3 mt-3 mb-2">
+                            <span>ログインユーザー: <strong>@userName</strong></span>
+                        </div>
                         }
                         else
                         {
-            <div class="px-3 mt-3 mb-2">
-            未ログイン</div>
+                            <div class="px-3 mt-3 mb-2">未ログイン</div>
                         }
 
-                </div>
             </header>
 
             <main role="main" class="main-body">
