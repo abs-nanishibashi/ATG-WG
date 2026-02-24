@@ -155,7 +155,11 @@ namespace GeneralAffairsManagementProject.Pages
         public IActionResult OnPost()
         {
             var correlationId = HttpContext.TraceIdentifier;
-            var orderUserName = User.Identity?.Name ?? "system";
+            var orderUserName =
+                User.FindFirst("preferred_username")?.Value
+                ?? User.FindFirst("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress")?.Value
+                ?? User.Identity?.Name
+                ?? "system";
             var orderNo = DateTime.Now.ToString("yyyyMMddHHmmss");
             var jstNow = DateTimeUtils.GetJstNow();
 
