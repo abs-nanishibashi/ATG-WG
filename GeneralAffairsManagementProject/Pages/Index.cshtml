@@ -170,9 +170,7 @@
                             {
                                 <tr>
                                     <td>
-                                        <a asp-page="/OrderDetail" asp-route-id="@item.OrderId" class="text-decoration-none">
-                                            @item.OrderIdDisplay
-                                        </a>
+                                        @item.OrderIdDisplay
                                     </td>
                                     <td>@item.OrderDate.ToString("yyyy/MM/dd")</td>
                                     <td>@item.OrderUser</td>

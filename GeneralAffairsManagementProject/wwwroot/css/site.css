@@ -70,3 +70,13 @@ span.paging-link.active {
     cursor: not-allowed;
     border-color: #dee2e6;
 }
+
+/* ”­’ˆê——ƒe[ƒuƒ‹‚ÌŒrü */
+.table-bordered th,
+.table-bordered td {
+    border: 1px solid #dee2e6 !important;
+}
+
+.table-bordered thead th {
+    border-bottom-width: 2px !important;
+}
